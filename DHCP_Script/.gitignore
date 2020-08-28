@@ -1,0 +1,5 @@
+# pycharm project directory
+.idea/
+# python virtual env directories
+env/
+venv/
