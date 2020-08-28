@@ -1,0 +1,153 @@
+name: iot_homeskillet_poc_addon_export_test
+label: HomeSkillet add-ons for IoT POC readiness from export test
+description: Skillet Generated from uploaded configs
+type: panos
+labels:
+  collection:
+    - IoT
+    - HomeSkillet
+
+variables:
+- name: intf_name
+  description: intf_name
+  type_hint: text
+  default: 'ethernet1/3'
+- name: intf_ip_address
+  description: intf_ip_address
+  type_hint: text
+  default: '192.168.65.1/24'
+- name: new_zone_name
+  description: new_zone_name
+  type_hint: text
+  default: 'broker'
+
+snippets:
+
+- name: network_add_ethernet_intf
+  xpath: /config/devices/entry[@name="localhost.localdomain"]/network/interface/ethernet
+  element: |-
+    <entry name="{{ intf_name }}">
+      <layer3>
+        <ndp-proxy>
+          <enabled>no</enabled>
+        </ndp-proxy>
+        <ip>
+          <entry name="{{ intf_ip_address }}"/>
+        </ip>
+        <interface-management-profile>MSSP management trust</interface-management-profile>
+        <lldp>
+          <enable>no</enable>
+        </lldp>
+      </layer3>
+    </entry>
+
+- name: virtual_router_add_intf
+  xpath: /config/devices/entry[@name="localhost.localdomain"]/network/virtual-router/entry[@name="default"]/interface
+  element: <member>{{ intf_name }}</member>
+
+- name: add_zone_with_intf
+  xpath: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone
+  element: |-
+    <entry name="{{ new_zone_name }}">
+      <network>
+        <layer3>
+          <member>{{ intf_name }}</member>
+        </layer3>
+        <log-setting>default</log-setting>
+      </network>
+    </entry>
+
+- name: device_enable_dhcp_broadcast
+  xpath: /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting
+  element: |-
+    <session>
+      <packet-buffer-protection-latency-alert>50</packet-buffer-protection-latency-alert>
+      <packet-buffer-protection-latency-activate>200</packet-buffer-protection-latency-activate>
+      <packet-buffer-protection-latency-max-tolerate>500</packet-buffer-protection-latency-max-tolerate>
+      <packet-buffer-protection-latency-block-countdown>500</packet-buffer-protection-latency-block-countdown>
+      <dhcp-bcast-session-on>yes</dhcp-bcast-session-on>
+    </session>
+
+- name: internal_internal_security
+  xpath: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules
+  element: <entry name="internal">
+             <profile-setting>
+               <group>
+                 <member>default</member>
+               </group>
+             </profile-setting>
+             <to>
+               <member>internal</member>
+             </to>
+             <from>
+               <member>internal</member>
+             </from>
+             <source>
+               <member>any</member>
+             </source>
+             <destination>
+               <member>any</member>
+             </destination>
+             <source-user>
+               <member>any</member>
+             </source-user>
+             <category>
+               <member>any</member>
+             </category>
+             <application>
+               <member>any</member>
+             </application>
+             <service>
+               <member>any</member>
+             </service>
+             <source-hip>
+               <member>any</member>
+             </source-hip>
+             <destination-hip>
+               <member>any</member>
+             </destination-hip>
+             <action>allow</action>
+             <log-setting>default</log-setting>
+           </entry>
+
+- name: internal_broker_security
+  xpath: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules
+  element: <entry name="client_broker">
+             <profile-setting>
+               <group>
+                 <member>default</member>
+               </group>
+             </profile-setting>
+             <to>
+               <member>Broker</member>
+             </to>
+             <from>
+               <member>internal</member>
+             </from>
+             <source>
+               <member>any</member>
+             </source>
+             <destination>
+               <member>any</member>
+             </destination>
+             <source-user>
+               <member>any</member>
+             </source-user>
+             <category>
+               <member>any</member>
+             </category>
+             <application>
+               <member>any</member>
+             </application>
+             <service>
+               <member>any</member>
+             </service>
+             <source-hip>
+               <member>any</member>
+             </source-hip>
+             <destination-hip>
+               <member>any</member>
+             </destination-hip>
+             <action>allow</action>
+             <log-setting>default</log-setting>
+           </entry>
