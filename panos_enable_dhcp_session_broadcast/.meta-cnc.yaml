@@ -1,0 +1,18 @@
+# quick config to enable DHCP session broadcast
+# available in PAN-OS 10.0 and needed for DHCP enhanced application logging
+name: panos_enable_dhcp_session_broadcast
+label: Enable DHCP session broadcast in NGFW
+description: Enable DHCP session broadcast to capture DHCP sessions for enhanced application logging
+type: panos
+labels:
+  collection:
+    - lib
+
+snippets:
+
+- name: device_enable_dhcp_broadcast
+  xpath: /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting
+  element: |-
+    <session>
+      <dhcp-bcast-session-on>yes</dhcp-bcast-session-on>
+    </session>

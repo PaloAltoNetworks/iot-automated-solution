@@ -3,12 +3,18 @@
 Collection of content to help automate NGFW IoT deployments, configuration, and
 traffic generation
 
-More elements coming soon...
 
+## Prerequisites
+
+    * Cortex Data Lake license activated
+    * Cortex Data Lake NGFW onboarding Pre-Shared Key generated/captured
+    * NGFW serial number activated for Cortex IoT
+    * panHandler: import the github repo panos-logging-skillets
+    * panHandler 4.0 or later if used to play skillets and playbooks
+    * existing firewall configuration with interfaces, zones, policies
 
 ## IoT Configuration Workflow
 
-Coming soon...
 
 Working in tandem with the content in 
 [panos-logging-skillets](https://github.com/PaloAltoNetworks/panos-logging-skillets)
@@ -26,19 +32,17 @@ and IoT readiness including:
     
 ## IoT Configuration Skillets
 
-Coming soon...
 
 Working in tandem with the workflow, simple configuration skillets designed to 
 update the NGFW configuration to be CDL/IoT ready.
 
 ## IoT Validation Skillet
 
-Coming soon...
 
 Validate key CDL and IoT NGFW elements to help users discover missing elements
 required for IoT readiness
 
-## IoT POC built on HomeSkillet Add-on Configuration
+## IoT POC built using HomeSkillet Add-on Configuration
 
 Augment the HomeSkillet configuration for an IoT configuration and POC.
 

@@ -1,0 +1,67 @@
+name: iot_add_log_forwarding_profile
+label: Add IoT-ready Log Forwarding Profile
+description: |
+  Add a log forwarding profile configured with Cortex Data Lake and Enhanced Application Logging
+type: panos
+labels:
+  collection: lib
+
+variables:
+
+  - name: log_profile_name
+    description: name of logging profile to create
+    default: default
+    type_hint: text
+    help_text: generates a new log forwarding profile so use a unique name
+
+snippets:
+
+  - name: create_cdl_log_forwarding_profile
+    xpath: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles
+    element: |-
+      <entry name="{{ log_profile_name }}">
+        <match-list>
+          <entry name="Traffic_Log_Forwarding">
+            <log-type>traffic</log-type>
+            <filter>All Logs</filter>
+            <send-to-panorama>yes</send-to-panorama>
+          </entry>
+          <entry name="Threat_Log_Forwarding">
+            <log-type>threat</log-type>
+            <filter>All Logs</filter>
+            <send-to-panorama>yes</send-to-panorama>
+          </entry>
+          <entry name="Wildfire_Log_Forwarding">
+            <log-type>wildfire</log-type>
+            <filter>All Logs</filter>
+            <send-to-panorama>yes</send-to-panorama>
+          </entry>
+          <entry name="URL_Log_Forwarding">
+            <log-type>url</log-type>
+            <filter>All Logs</filter>
+            <send-to-panorama>yes</send-to-panorama>
+          </entry>
+          <entry name="Data_Log_Forwarding">
+            <log-type>data</log-type>
+            <filter>All Logs</filter>
+            <send-to-panorama>yes</send-to-panorama>
+          </entry>
+          <entry name="Tunnel_Log_Forwarding">
+            <log-type>tunnel</log-type>
+            <filter>All Logs</filter>
+            <send-to-panorama>yes</send-to-panorama>
+          </entry>
+          <entry name="Auth_Log_Forwarding">
+            <log-type>auth</log-type>
+            <filter>All Logs</filter>
+            <send-to-panorama>yes</send-to-panorama>
+          </entry>
+          <entry name="decryption-enhanced-app-logging">
+            <send-to-panorama>yes</send-to-panorama>
+            <log-type>decryption</log-type>
+            <filter>All Logs</filter>
+            <quarantine>no</quarantine>
+          </entry>
+        </match-list>
+        <enhanced-application-logging>yes</enhanced-application-logging>
+      </entry>

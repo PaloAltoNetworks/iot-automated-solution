@@ -1,0 +1,88 @@
+name: iot_get_device_values
+
+label: Output Value Capturing from a PAN-OS Device
+
+description: |
+  Get a set of lists to be used as dropdown menu options
+  including interfaces, zones, security rules, log forwarding profiles
+type: rest
+
+labels:
+  collection:
+    - lib
+
+variables:
+  - name: TARGET_IP
+    description: Host
+    default: 0.0.0.0
+    type_hint: hidden
+  - name: TARGET_USERNAME
+    description: Username
+    default: admin
+    type_hint: hidden
+  - name: TARGET_PASSWORD
+    description: Password
+    default: admin
+    type_hint: hidden
+
+snippets:
+  - name: key_gen
+    path: https://{{ TARGET_IP }}/api/?type=keygen&user={{ TARGET_USERNAME }}&password={{ TARGET_PASSWORD }}
+    output_type: xml
+    outputs:
+      - name: api_key
+        capture_pattern: result/key
+
+  - name: interfaces_list
+    path: |
+      https://{{ TARGET_IP }}/api/?type=config&action=set&action=complete&xpath=/config/devices/
+      entry[@name='localhost.localdomain']/network/interface/ethernet&key={{ api_key }}
+    output_type: xml
+    outputs:
+      - name: interface_names
+        capture_pattern: ./completions/completion//@value
+
+  - name: zones_list
+    path: |
+      https://{{ TARGET_IP }}/api/?type=config&action=set&action=complete&xpath=/config/devices/entry
+      [@name='localhost.localdomain']/vsys/entry[@name='vsys1']/zone&key={{ api_key }}
+    output_type: xml
+    outputs:
+      - name: zone_names
+        capture_pattern: ./completions/completion//@value
+
+  - name: security_rules_list
+    path: |
+      https://{{ TARGET_IP }}/api/?type=config&action=set&action=complete&xpath=/config/devices/
+      entry[@name='localhost.localdomain']/vsys/entry[@name="vsys1"]/rulebase/security/rules&key={{ api_key }}
+    output_type: xml
+    outputs:
+      - name: security_rule_names
+        capture_pattern: ./completions/completion//@value
+
+  - name: log_profiles_list_vsys
+    path: |
+      https://{{ TARGET_IP }}/api/?type=config&action=set&action=complete&xpath=/config/devices
+      /entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles&key={{ api_key }}
+    output_type: xml
+    outputs:
+      - name: log_profile_names_vsys
+        capture_pattern: ./completions/completion//@value
+
+  - name: log_profiles_list_shared
+    path: |
+      https://{{ TARGET_IP }}/api/?type=config&action=set&action=complete&xpath=/config/shared
+      /log-settings/profiles&key={{ api_key }}
+    output_type: xml
+    outputs:
+      - name: log_profile_names_shared
+        capture_pattern: ./completions/completion//@value
+
+  - name: virtual_wire_lookup
+    path: |
+      https://{{ TARGET_IP }}/api/?type=config&action=set&action=complete&xpath=/config/devices/
+      entry[@name='localhost.localdomain']/network/virtual-wire&key={{ api_key }}
+    output_type: xml
+    outputs:
+      - name: virtual_wire_names
+        capture_pattern: ./completions/completion//@value

@@ -1,0 +1,51 @@
+# IoT configuration workflow
+# requires repo https://github.com/PaloAltoNetworks/panos-logging-skillets
+
+name: HS_POC_IoT_setup_workflow_panos
+label: 10.x HomeSkillet add-on configurations for IOT POC
+description: |
+  this workflow steps through the additional elements to make a NGFW
+  configured with HomeSkillet to be capable of supporting the IoT demo
+
+type: workflow
+
+labels:
+    collection:
+      - IoT
+
+variables:
+  # credentials for the device to configure
+  - name: TARGET_IP
+    description: NGFW IP or Hostname
+    default: 192.168.55.10
+    type_hint: fqdn_or_ip
+  - name: TARGET_USERNAME
+    description: NGFW Username
+    default: admin
+    type_hint: text
+  - name: TARGET_PASSWORD
+    description: NGFW Password
+    default: admin
+    type_hint: password
+
+  # initial workflow with user inputs - future version will capture the software version
+  - name: hs_poc_options
+    description: select IoT HomeSkillet POC options
+    default: ['add_broker_config', 'delete_zp_from_zone']
+    type_hint: checkbox
+    cbx_list:
+      - key: add IoT broker NGFW configuration (intf, zone, policy)
+        value: add_broker_config
+      - key: 10.0.0 bug workaround - delete client zone ZP profile
+        value: delete_zp_from_zone
+
+snippets:
+# workflow stages for IoT setup and configuration
+
+# add broker interface, routing, and zone
+  - name: iot_homeskillet_poc_add_interface
+    when: "'add_broker_config' in hs_poc_options"
+
+# 10.0.0 requires disable of the zone protect profile
+  - name: iot_homeskillet_delete_zone_protect
+    when: "'delete_zp_from_zone' in hs_poc_options"

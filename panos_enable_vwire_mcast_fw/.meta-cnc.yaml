@@ -1,0 +1,30 @@
+# skillet to update virtual wire entries with multicast firewalling
+# enables the NGFW to captured EAL log data for DHCP broadcast sessions
+name: iot_panos_enable_vwire_mcast_fw
+label: Enable Virtual Wire Multicast Firewalling
+description: Used to enable Enhanced Application logging in a Virtual Wire for DHCP broadcast sessions
+type: panos
+labels:
+  collection:
+    - lib
+
+variables:
+
+  - name: vwire_to_update
+    description: virtual wires to update with multicast firewalling enabled
+    default: ['']
+    type_hint: checkbox
+    source: virtual_wire_names
+
+snippets:
+
+- name: virtual_wire_enable_multicast_firewall
+  xpath: /config/devices/entry[@name='localhost.localdomain']/network/virtual-wire
+  element: |-
+    {%- for vwire in vwire_to_update %}
+      <entry name="{{ vwire }}">
+       <multicast-firewalling>
+         <enable>yes</enable>
+       </multicast-firewalling>
+      </entry>
+    {%- endfor %}

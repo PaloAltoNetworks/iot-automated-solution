@@ -1,0 +1,142 @@
+# IoT configuration workflow
+# requires repo https://github.com/PaloAltoNetworks/panos-logging-skillets
+
+name: IoT_setup_workflow_panos
+label: NGFW add-on configurations for IOT
+description: |
+  this workflow steps through the additional elements to make a NGFW IoT-ready
+  with a focus on Cortex Data Lake, Enhanced Application Logging, and DHCP
+
+type: workflow
+
+labels:
+    collection:
+      - IoT
+
+variables:
+  # credentials for the device to configure
+  - name: TARGET_IP
+    description: NGFW IP or Hostname
+    default: 192.168.55.10
+    type_hint: fqdn_or_ip
+  - name: TARGET_USERNAME
+    description: NGFW Username
+    default: admin
+    type_hint: text
+  - name: TARGET_PASSWORD
+    description: NGFW Password
+    default: admin
+    type_hint: password
+
+  # initial workflow with user inputs - future version will capture the software version
+  - name: workflow_sw_version
+    description: choose the IronSkillet version you want to load
+    default: v10.x
+    type_hint: dropdown
+    dd_list:
+      - key: v9.x
+        value: v9.x
+      - key: v10.x
+        value: v10.x
+
+  - name: cdl_options
+    description: select Cortex Data Lake options
+    default: []
+    type_hint: checkbox
+    cbx_list:
+      - key: activate and configure Cortex Data Lake
+        value: setup_cdl
+      - key: add CDL and EAL to existing log-forwarding profile
+        value: modify_log_profile
+      - key: add new log forwarding profile that is CDL and EAL ready
+        value: create_log_forwarding_profile
+      - key: update security rules with CDL-EAL ready logging profile
+        value: add_logging_to_security_rules
+
+  - name: v10x_options
+    description: select PAN-OS 10.x options for IoT readiness
+    default: []
+    type_hint: checkbox
+    toggle_hint:
+      source: workflow_sw_version
+      value: 'v10.x'
+    cbx_list:
+      - key: enable DHCP broadcast session if local DHCP server
+        value: v10x_enable_dhcp_broadcast
+      - key: enable Multicast Firewalling when using Virtual Wire
+        value: vwire_enable_mcast_fw
+
+  - name: v9x_options
+    description: select PAN-OS 9.x options for IoT readiness
+    default: []
+    type_hint: checkbox
+    toggle_hint:
+      source: workflow_sw_version
+      value: 'v9.x'
+    cbx_list:
+      - key: convert DHCP server to DHCP relay
+        value: v9x_convert_dhcp_relay
+
+  - name: policy_options
+    description: select IoT recommended security policy options
+    default: []
+    type_hint: checkbox
+    cbx_list:
+      - key: add DHCP security policy for named zones
+        value: add_dhcp_security_policy
+
+  - name: assess_options
+    description: IoT configuration and status validations
+    default: []
+    type_hint: checkbox
+    cbx_list:
+      - key: validate IoT configuration at the beginning of the workflow
+        value: run_iot_validation_begin
+      - key: validate IoT configuration at the end of the workflow
+        value: run_iot_validation_end
+
+snippets:
+# workflow stages for IoT setup and configuration
+
+# get existing device values to generate dropdowns in other skillets stages
+  - name: iot_get_device_values
+
+# run IoT validation
+  - name: IoT_setup_Validation
+    when: "'run_iot_validation_begin' in assess_options"
+
+# setup Cortex Data Lake
+  - name: cdl_global_config_playbook_script
+    when: "'setup_cdl' in cdl_options"
+
+# modify log forwarding profile to use CDL and EAL
+  - name: iot_add_cdl_and_eal_to_logging_profile
+    when: "'modify_log_profile' in cdl_options"
+
+# configure new log forwarding profile
+  - name: iot_add_log_forwarding_profile
+    when: "'create_log_forwarding_profile' in cdl_options"
+
+# add or update logging profile used in security rules
+  - name: iot_add_logging_to_security_rules
+    when: "'add_logging_to_security_rules' in cdl_options"
+
+# 10x enable dhcp session broadcast
+  - name: panos_enable_dhcp_session_broadcast
+    when: "('v10x_enable_dhcp_broadcast' in v10x_options) and ('v10.x' in workflow_sw_version)"
+
+# 10x enable vware multicast firewalling
+  - name: iot_panos_enable_vwire_mcast_fw
+    when: "('vwire_enable_mcast_fw' in v10x_options) and ('v10.x' in workflow_sw_version)"
+
+# 9x convert DHCP server to DHCP relay per config guide
+  - name: iot_move_dhcp_server_to_dhcp_relay
+    when: "('v9x_convert_dhcp_relay' in v9x_options) and ('v9.x' in workflow_sw_version)"
+
+# add DHCP security policy
+  - name: add_dhcp_application_security_policy
+    when: "'add_dhcp_security_policy' in policy_options"
+
+# run IoT validation
+  - name: IoT_setup_Validation
+    when: "'run_iot_validation_end' in assess_options"

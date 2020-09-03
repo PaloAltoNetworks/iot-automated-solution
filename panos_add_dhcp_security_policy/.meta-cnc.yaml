@@ -1,0 +1,111 @@
+# quick config to enable DHCP session broadcast
+# available in PAN-OS 10.0 and needed for DHCP enhanced application logging
+name: add_dhcp_application_security_policy
+label: Add DHCP application security policy
+description: Add DHCP security policy between named zones with CDL enabled log forwarding profile
+type: panos
+labels:
+  collection:
+    - lib
+
+variables:
+
+  # TODO: include all key security policy elements such as profile names/group
+  - name: source_zone
+    description: source zone with DHCP clients
+    type_hint: dropdown
+    source: zone_names
+    default: internal
+  - name: destination_zone
+    description: destination zone with DHCP server
+    help_text: for local zone DHCP server this can be the same as the source zone - an intrazone policy
+    type_hint: dropdown
+    source: zone_names
+    default: internal
+  - name: log_forwarding_profile
+    description: log forwarding profile to attach to the rule
+    type_hint: dropdown
+    source: log_profile_names_vsys
+  - name: move_rule
+    description: move rule location
+    default: top
+    help_text: position of the new security rule after adding to the candidate configuration
+    type_hint: dropdown
+    dd_list:
+     - key: top
+       value: top
+     - key: bottom
+       value: bottom
+     - key: after
+       value: after
+     - key: before
+       value: before
+  - name: ref_rule_name
+    description: rule to move if before or after selected
+    default: rule name
+    type_hint: dropdown
+    source: security_rule_names
+    help_text: name of security policy to move the new rule before or after
+    toggle_hint:
+      source: move_rule
+      value:
+        - after
+        - before
+
+
+snippets:
+
+  - name: internal_internal_security
+    xpath: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules
+    element: <entry name="dhcp-traffic">
+               <profile-setting>
+                 <group>
+                   <member>default</member>
+                 </group>
+               </profile-setting>
+               <to>
+                 <member>{{ destination_zone }}</member>
+               </to>
+               <from>
+                 <member>{{ source_zone }}</member>
+               </from>
+               <source>
+                 <member>any</member>
+               </source>
+               <destination>
+                 <member>any</member>
+               </destination>
+               <source-user>
+                 <member>any</member>
+               </source-user>
+               <category>
+                 <member>any</member>
+               </category>
+               <application>
+                 <member>dhcp</member>
+               </application>
+               <service>
+                 <member>any</member>
+               </service>
+               <source-hip>
+                 <member>any</member>
+               </source-hip>
+               <destination-hip>
+                 <member>any</member>
+               </destination-hip>
+               <action>allow</action>
+               <log-setting>{{ log_forwarding_profile }}</log-setting>
+             </entry>
+
+  - name: move_dhcp_rule_top_bottom
+    xpath: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry[@name='dhcp-traffic']
+    cmd: move
+    where: '{{ move_rule }}'
+    when: move_rule in ['top', 'bottom']
+
+  - name: move_dhcp_rule
+    xpath: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry[@name='dhcp-traffic']
+    cmd: move
+    where: '{{ move_rule }}'
+    dst: '{{ ref_rule_name }}'
+    when: move_rule in ['before', 'after']

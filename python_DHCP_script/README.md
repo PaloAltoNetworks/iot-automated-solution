@@ -48,9 +48,3 @@ The command to run the traffic generation script is
 
 `sudo python3 iot_traffic.py`
 
-
-### dhtest code
-
-This script uses [dhtest](https://github.com/saravana815/dhtest) for DHCP client
-emulation. The script is used 'as is'. Any issues for this part of the solution
-should be posted as issues in the dhtest repo.
