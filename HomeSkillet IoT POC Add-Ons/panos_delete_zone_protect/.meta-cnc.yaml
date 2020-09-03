@@ -1,0 +1,15 @@
+name: iot_homeskillet_delete_zone_protect
+label: Delete zone protect profile for client zone
+description: 10.0.0 bug found due where ZP profile treats dhcp broadcast session as ip spoofing
+type: panos
+labels:
+  collection:
+    - lib
+
+snippets:
+  # delete original dhcp server
+  - name: delete_zone_protect_profile_client
+    cmd: delete
+    xpath: |-
+      /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/zone/
+      entry[@name='internal']/network/zone-protection-profile

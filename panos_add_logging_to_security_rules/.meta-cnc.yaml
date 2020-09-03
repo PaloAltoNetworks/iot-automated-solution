@@ -1,0 +1,34 @@
+
+name: iot_add_logging_to_security_rules
+label: Add Logging Profile to selected security rules
+description: Update security rules by adding a log forwarding profile
+type: panos
+labels:
+  collection:
+    - lib
+
+variables:
+
+  - name: log_profile_name
+    description: log forwarding profile used to update security rules
+    default: default
+    type_hint: dropdown
+    source: log_profile_names_vsys
+
+  - name: security_rules_to_update
+    description: select rules that will be updated with the logging profile
+    default: ['']
+    type_hint: checkbox
+    source: security_rule_names
+
+
+snippets:
+
+  - name: security_rule_logging_profile
+    xpath: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules
+    element: |-
+      {%- for rule_name in security_rules_to_update %}
+        <entry name="{{ rule_name }}">
+         <log-setting>{{ log_profile_name }}</log-setting>
+        </entry>
+      {% endfor %}

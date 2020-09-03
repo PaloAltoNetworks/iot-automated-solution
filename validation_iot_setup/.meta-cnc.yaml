@@ -1,0 +1,420 @@
+# skillet preamble information used by panhandler
+# ---------------------------------------------------------------------
+# unique snippet name
+name: IoT_setup_Validation
+# label used for menu selection
+label: Validate Cortex IoT NGFW activation and configurations
+description: check CDL/EAL setup and firewall configuration to enable IoT
+
+type: pan_validation
+
+# grouping of like snippets for dynamic menu creation in panhandler
+labels:
+  collection:
+    - lib
+
+variables:
+
+  - name: dhcp_setup
+    description: DHCP related checks
+    default: ['']
+    type_hint: checkbox
+    cbx_list:
+      - key: local DHCP server checks
+        value: dhcp_server_checks
+      - key: DHCP relay checks
+        value: dhcp_relay_checks
+      - key: using a Virtual Wire
+        value: using_vwire
+
+# snippets section
+# ---------------------------------------------------------------------
+snippets:
+# example output capture and test structure layout
+
+  # check that logging service license exists and not expired
+  - name: get_system_info
+    cmd: cli
+    # This cli command will return xml
+    cmd_str: request license info
+    output_type: xml
+    outputs:
+          # let's capture a variable called 'connected_server_ip'
+      - name: logging_service_expired
+        capture_value: ./entry/description[text()="Device Logging Service"]/../expired/text()
+      - name: logging_service_capacity
+        capture_value: ./entry/description[text()="Device Logging Service"]/../custom/_Log_Storage_TB/text()
+      - name: logging_service_expires
+        capture_value: ./entry/description[text()="Device Logging Service"]/../expires/text()
+
+  - name: logging_service_active
+    label: Logging Service is licensed and not expired
+    test:  logging_service_expired == "no"
+
+    fail_message: |
+      Logging service is not licensed or the license has expired for this device
+      License expiration date is {{ logging_service_expires }}
+    pass_message: |
+      Logging Service is licensed and active with {{ logging_service_capacity }}TB of logging
+      License expiration date is {{ logging_service_expires }}
+    documentation_link: |
+      https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/
+      get-started-with-cortex-data-lake/license-activation.html
+
+  - name: device_config_file
+    cmd: parse
+    variable: config
+    outputs:
+      - name: cdl_enabled
+        capture_value: /config/devices/entry/deviceconfig/setting/logging/logging-service-forwarding/enable/text()
+
+  - name: cdl_enabled_test
+    label: Cortex Data Lake enabled in global configuration
+    test:  cdl_enabled == "yes"
+
+    fail_message: |
+      CDL must be enabled in the device to push logs to the cloud
+    pass_message: CDL is globally enabled
+    documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
+
+  - name: device_config_file
+    cmd: parse
+    variable: config
+    outputs:
+      - name: logging_service_regions
+        capture_value: /config/devices/entry/deviceconfig/setting/logging/logging-service-forwarding/logging-service-regions/text()
+
+  - name: logging_service_regions_test
+    label: Cortext Data Lake logging region is configured
+    test:  logging_service_regions | length
+
+    fail_message: |
+      No region chosen, Need to on-board firewall and license to CDL in order to choose region
+    pass_message: Firewall region is set as {{logging_service_regions}}
+    documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
+
+  - name: device_config_file
+    cmd: parse
+    variable: config
+    outputs:
+      - name: enhanced_application_logging_enabled
+        capture_value: /config/devices/entry/deviceconfig/setting/logging/enhanced-application-logging/enable/text()
+
+  - name: enhanced_application_logging_enabled_test
+    label: Enhanced Applicationg Logging is globally enabled
+    test:  enhanced_application_logging_enabled == "yes"
+
+    fail_message: |
+      EAL must be enabled in the device to push logs to CDL services
+    pass_message: EAL is globally enabled
+    documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
+
+  - name: get_logging_status
+    cmd: cli
+        # This cli command will return a text blob
+    cmd_str: show logging-status
+    output_type: text
+    outputs:
+          # let's capture a variable called 'connected_server_ip'
+      - name: capture_traffic_counters
+            # this will search the text returned from the cli command and return the first match found using this regex
+            # pattern
+        capture_pattern: config\s{2,}(.*?)\s{2,}(.*?)\s{2,}
+
+# this will capture ALL matches from the following regex as a list. No matches always return an empty list
+      - name: all_cms
+        capture_list: Not Sending to CMS (\d+)
+
+  - name: capture_last_log_created
+    label: Checking if traffic logs are created
+    test: |
+      (
+      capture_traffic_counters[0] != "Not Available"
+      and capture_traffic_counters[0] | length != 0
+      )
+    fail_message: |
+      Traffic logs are not being created
+    pass_message: "{{capture_traffic_counters[0]}}"
+    documentation_link: https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000CmMtCAK
+
+  - name: capture_last_log_forwarded
+    label: Checking if traffic logs are forwarded
+    test: capture_traffic_counters[1] != "Not Available" and capture_traffic_counters[1] | length
+
+    fail_message: |
+      Traffic logs are not being forwarded
+    pass_message: "{{capture_traffic_counters[1]}}"
+    documentation_link: https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000CmMtCAK
+
+  - name: verification
+    cmd: cli
+        # This cli command will return a text blob
+    cmd_str: request logging-service-forwarding certificate info
+    output_type: text
+    outputs:
+          # capture a variable called 'cert_chain_verification'
+      - name: cert_chain_verification
+        capture_pattern: Certificate chain verification:\s{1,2}(.*?)\s{1,2}
+      - name: private_public_key_match
+        capture_pattern: Public and private key pair match:\s{1,2}(.*?)\s{1,2}
+      - name: certificate_expired
+        capture_pattern: Certificate expired:\s{1,2}(.*?)\s{1,2}
+
+  - name: cert_chain_verification_test
+    label: CDL certificate chain is verified
+    test: cert_chain_verification == "OK"
+    fail_message: |
+      Certificate chain is not verified
+    pass_message: Certificate chain is verified
+    documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
+
+  - name: private_public_key_match_test
+    label: CDL certificate private and public keys match
+    test: private_public_key_match == "Yes"
+    fail_message: |
+      There is no private public key match
+    pass_message: There is a private public key match
+    documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
+
+  - name: certificate_expired_test
+    label: CDL certificate has not expired
+    test: certificate_expired == "No"
+    fail_message: |
+      Certificate has expired
+    pass_message: Certificate is valid
+    documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
+
+  - name: cortexDataLake
+    cmd: cli
+    cmd_str: request logging-service-forwarding customerinfo show
+    outputs:
+      - name: fullResponse
+        capture_object: /custinfo
+      - name: CDLregion
+        capture_value: /custinfo/entry[@name="1"]/region-name/text()
+      - name: CDLcustomerID
+        capture_value: /custinfo/entry[@name="1"]/customer-id/text()
+
+  - name: CDLregion_test
+    label: CDL customer region captured
+    test:  CDLregion | length
+
+    fail_message: |
+      No CDL region present, check if certificate fetch is successful
+    pass_message: Firewall region is set as {{CDLregion}}
+    documentation_link: https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000CmMtCAK
+
+  - name: CDLcustomerID_test
+    label: CDL customerID exists
+    test:  CDLcustomerID | length
+
+    fail_message: |
+      No CDL Customer ID present, check if certificate fetch is successful
+    pass_message: Cortex Data Lake customer ID is set as {{CDLcustomerID}}
+    documentation_link: https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000CmMtCAK
+
+  - name: device_config_file
+    cmd: parse
+    variable: config
+    outputs:
+
+    # get list of profiles from both (Test and Default)
+    #that are sending to panorama via xpath
+      - name: sending_to_panorama_enabled
+        capture_list: |-
+          /config//log-settings/profiles/entry
+          /match-list/entry/send-to-panorama[text()='yes']/../../../@name
+
+    # Xpath gets list of all possible profiles then filter to profiles that
+    # are not in sending_to_panorama AKA they arent sending to panorama
+    # filter_items then goes through the top list and determines if it's present in this
+    # profiles_not_sending_panorama list, if it's not present it filters it out.
+      - name: profiles_not_sending_panorama
+        capture_list: |-
+          /config//log-settings/profiles/entry/
+          match-list/entry/send-to-panorama/../../../@name
+        filter_items: item not in sending_to_panorama_enabled
+
+      # get the complete object to parse for output message values
+      - name: log_settings_object_vsys
+        capture_object: |-
+          /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
+      - name: log_settings_object_shared
+        capture_object: |-
+          /config/shared/log-settings/profiles/entry
+
+  - name: check_sending_to_panorama_enabled
+    label: All profiles and rules are configured to forward to Cortex Data Lake
+    # if this test passes that means there is nothing in profiles_not_sending_panorama
+    # meaning that every profile is currently sending to panorama
+    # the complex output uses a captured dict object and iterates across profiles and rules
+    # looking for specific entries not sending to panorama aka cortex data lake
+    test: profiles_not_sending_panorama | length == 0
+    severity: high
+    fail_message: |
+      profiles and associated rules not configured to forward to Cortex Data Lake are:
+
+      (profile name, rule name, log type)
+      {%- for capture_obj in [ log_settings_object_shared, log_settings_object_vsys] %}
+      {%- if capture_obj is defined and capture_obj %}
+      {#- loop across the log forwarding profile objects to find non CDL forwarding rules #}
+      {%- if not capture_obj[1] %}
+        {%- if not capture_obj['entry']['match-list']['entry'][1] %}
+          {%- if capture_obj['entry']['match-list']['entry']['send-to-panorama'] != 'yes' %}
+          {{ capture_obj['entry']['@name'] }}, {{ capture_obj['entry']['match-list']['entry']['@name'] }}, {{ capture_obj['entry']['match-list']['entry']['log-type'] }}
+          {%- endif %}
+        {%- else %}
+          {#- for multiple rules iterate across each list item to find bad rules #}
+          {%- for logRule in capture_obj['entry']['match-list']['entry'] %}
+            {%- if logRule['send-to-panorama'] != 'yes' %}
+            {{ capture_obj['entry']['@name'] }}, {{ logRule['@name'] }}, {{ logRule['log-type'] }}
+            {%- endif %}
+          {%- endfor %}
+        {% endif %}
+      {%- else %}
+      {%- for profile_entry in capture_obj %}
+        {%- for key, profile in profile_entry.items() %}
+          {%- set profile_name = profile['@name'] %}
+          {%- for key2, matchList in profile['match-list'].items() %}
+            {#- check if a single rule entry without a list for iteraction #}
+            {%- if not matchList[1] %}
+              {%- if matchList['send-to-panorama'] != 'yes' %}
+                {{ profile_name }}, {{ matchList['@name'] }}, {{ matchList['log-type'] }}
+              {%- endif %}
+            {%- else %}
+              {#- for multiple rules iterate across each list item to find bad rules #}
+              {%- for logRule in matchList %}
+                {%- if logRule['send-to-panorama'] != 'yes' %}
+                {{ profile_name }}, {{ logRule['@name'] }}, {{ logRule['log-type'] }}
+                {%- endif %}
+              {%- endfor %}
+            {%- endif -%}
+          {%- endfor %}
+        {%- endfor %}
+      {%- endfor %}
+      {%- endif %}
+      {%- endif %}
+      {%- endfor %}
+
+    pass_message: |
+      all profiles are configured to forward to Cortex Data Lake
+    documentation_link: https://docs.paloaltonetworks.com/pan-os/9-0/pan-os-admin/monitoring/configure-log-forwarding.html
+
+  - name: device_config_file
+    cmd: parse
+    variable: config
+    outputs:
+
+    # get list of the profiles that have EAL enabled via xpath below
+      - name: eal_enabled
+        capture_list: |-
+          /config//log-settings/profiles/entry
+          /enhanced-application-logging[text()='yes']/../@name
+
+    # Xpath gets list of all possible profiles then filter to profiles that
+    # are not in eal_enabled which means they don't have EAL enabled
+    # filter_items then goes through the top list and determines if it's present in this
+    # eal_not_enabled list, if it's not present it filters it out.
+      - name: eal_not_enabled
+        capture_list: |-
+          /config//log-settings/profiles/entry/@name
+        filter_items: item not in eal_enabled
+
+
+  - name: check_eal_enabled
+    label: Enhanced Application Logging is enabled for all log forwarding profiles
+  #if this test passes that means there is nothing in eal_not_enabled
+  #meaning that every profile currently has eal enabled
+    test: eal_not_enabled | length == 0
+    severity: high
+    fail_message: |
+      profiles that don't have EAL enabled are:
+      {{ eal_not_enabled }}
+    pass_message: |
+      all profiles have EAL enabled
+    documentation_link: https://docs.paloaltonetworks.com/pan-os/8-1/pan-os-admin/monitoring/enhanced-application-logs
+
+  # capture for DHCP Broadcast session enabled
+  - name: device_config_file
+    cmd: parse
+    variable: config
+    outputs:
+    # get list of the profiles that have EAL enabled via xpath below
+      - name: dhcp_broadcast_enabled
+        capture_value: |-
+          /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting/session/dhcp-bcast-session-on/text()
+
+
+  # for 10.x and later EAL logging for DHCP can be used with a local DHCP server
+  # enable DHCP broadcast session must be enabled
+  - name: check_dhcp_broadcast_enabled
+    label: DHCP Broadcast Session must be Enabled for local DHCP Server EAL Logging
+    test: dhcp_broadcast_enabled == 'yes'
+    severity: high
+    when: "'dhcp_server_checks' in dhcp_setup"
+    fail_message: |
+      DHCP Broadcast Session is not enabled
+    pass_message: |
+      DHCP Broadcast Session is enabled
+    documentation_link: |
+      https://docs.paloaltonetworks.com/pan-os/10-0/pan-os-web-interface-help
+      /device/device-setup-session/session-settings.html
+
+  # test for Virtual Wire Multicast Firewalling
+  - name: device_config_file
+    cmd: parse
+    variable: config
+    outputs:
+
+      # create a list of virtual wires with multicast firewalling enabled and all virtual wires
+      # use the delta to create a list without multicast firewalling enabled
+      - name: vwire_mcast_firewalling_enabled
+        capture_list: |-
+          /config/devices/entry[@name='localhost.localdomain']/network/virtual-wire/entry/
+          multicast-firewalling/enable[text()='yes']/../../@name
+      - name: vwire_mcast_firewalling_not_enabled
+        capture_list: /config/devices/entry[@name='localhost.localdomain']/network/virtual-wire/entry/@name
+        filter_items: item not in vwire_mcast_firewalling_enabled
+
+
+  # enable multicast firewalling for virtual wires
+  - name: check_vwire_multicast_firewalling
+    label: Virtual Wire Multicast Firewaling enabled for local DHCP Server EAL Logging
+    test: vwire_mcast_firewalling_not_enabled | length == 0
+    severity: high
+    when: "'using_vwire' in dhcp_setup"
+    fail_message: |
+      Multicast Firewalling not enabled in these Virtual Wires to capture DHCP Broadcast Sessions
+      {{ vwire_mcast_firewalling_not_enabled }}
+    pass_message: |
+      Multicast Firewalling enabled in Virtual Wires to capture DHCP Broadcast Sessions
+    documentation_link: |
+      https://docs.paloaltonetworks.com/pan-os/10-0/pan-os-admin/networking/configure-interfaces/
+      virtual-wire-interfaces/configure-virtual-wires.html
+
+  # test for DHCP relay configuration
+  - name: device_config_file
+    cmd: parse
+    variable: config
+    outputs:
+
+      # check if any instance of DHCP relay configured
+      - name: dhcp_relay_interfaces
+        capture_list: |-
+          /config/devices/entry[@name='localhost.localdomain']/network/dhcp/interface/entry/relay/../@name
+
+  - name: check_dhcp_relay_configured
+    label: At least one instance of DHCP relay configured
+    test: dhcp_relay_interfaces | length
+    severity: high
+    when: "'dhcp_relay_checks' in dhcp_setup"
+    fail_message: |
+      DHCP relay not configured on this device
+    pass_message: |
+      DHCP relay is configured on this device for interfaces:
+      {{ dhcp_relay_interfaces }}
+    documentation_link: |
+      https://docs.paloaltonetworks.com/pan-os/10-0/pan-os-admin/networking/dhcp/
+      configure-an-interface-as-a-dhcp-relay-agent.html
+# ---------------------------------------------------------------------
+# end of snippets section

@@ -1,0 +1,197 @@
+name: iot_move_dhcp_server_to_dhcp_relay
+label: Move NGFW DHCP server to VLAN interface and add DHCP relay
+description: |
+  To enable EAL logging for DHCP, pre-10.0 PAN-OS requires DHCP relay
+  in the traffic logs. This skillet will capture the existing DHCP server
+  configuration, move to a logical VLAN interface, and enable DHCP relay
+  for the original DHCP server interface.
+type: panos
+labels:
+  collection:
+    - lib
+
+variables:
+
+  - name: dhcp_server_interface
+    description: interface name currently associated to the DHCP local server
+    default: ethernet1/2
+    type_hint: dropdown
+    source: interface_names
+  - name: dhcp_vlan_interface
+    description: VLAN logical interface in the form of vlan.1 or vlan.2
+    default: vlan.1
+    type_hint: text
+    help_text: this logical interface can be the server source without using a physical device interface
+  - name: dhcp_vlan_interface_ip
+    description: ip address of the new vlan interface without a mask
+    default: 192.168.6.1
+    type_hint: text
+    help_text: IP address for the logical vlan interface. /32 will be added by the skillet
+snippets:
+
+  # capture the current DHCP server configuration as XML element
+  - name: get_dhcp_config
+    cmd: show
+    xpath: /config/devices/entry[@name='localhost.localdomain']/network/dhcp/interface/entry[@name='{{ dhcp_server_interface }}']/server
+    output_type: text
+    outputs:
+      - name: dhcp_server_config
+
+  - name: get interface_zone_vr
+    cmd: parse
+    variable: config
+    outputs:
+      - name: original_zone
+        capture_value: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/zone/entry/network/layer3/member[text()='ethernet1/2']/../../../@name
+      - name: original_vr
+        capture_value: /config/devices/entry[@name='localhost.localdomain']/network/virtual-router/entry/interface/member[text()='{{ dhcp_server_interface }}']/../../@name
+
+  # add a new vlan interface
+  - name: add_vlan_interface
+    xpath: /config/devices/entry[@name="localhost.localdomain"]/network/interface
+    element: |-
+        <vlan>
+          <units>
+            <entry name="{{ dhcp_vlan_interface }}">
+              <ipv6>
+                <neighbor-discovery>
+                  <router-advertisement>
+                    <enable>no</enable>
+                  </router-advertisement>
+                </neighbor-discovery>
+              </ipv6>
+              <ndp-proxy>
+                <enabled>no</enabled>
+              </ndp-proxy>
+              <adjust-tcp-mss>
+                <enable>no</enable>
+              </adjust-tcp-mss>
+              <ip>
+                <entry name="{{ dhcp_vlan_interface_ip }}/32"/>
+              </ip>
+            </entry>
+          </units>
+        </vlan>
+
+  - name: create_new_vlan
+    xpath: /config/devices/entry[@name="localhost.localdomain"]/network
+    element: |-
+        <vlan>
+          <entry name="DHCP_VLAN">
+            <virtual-interface>
+              <interface>{{ dhcp_vlan_interface }}</interface>
+            </virtual-interface>
+          </entry>
+        </vlan>
+
+  - name: add_vlan_to_internal_zone
+    xpath: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry[@name="{{ original_zone }}"]/network/layer3
+    element: |-
+        <member>{{ dhcp_vlan_interface }}</member>
+
+  - name: dhcp_virtual_router
+    xpath: /config/devices/entry[@name="localhost.localdomain"]/network/virtual-router
+    element: |-
+        <entry name="DHCP_VR">
+          <ecmp>
+            <algorithm>
+              <ip-modulo/>
+            </algorithm>
+          </ecmp>
+          <protocol>
+            <bgp>
+              <routing-options>
+                <graceful-restart>
+                  <enable>yes</enable>
+                </graceful-restart>
+              </routing-options>
+              <enable>no</enable>
+            </bgp>
+            <rip>
+              <enable>no</enable>
+            </rip>
+            <ospf>
+              <enable>no</enable>
+            </ospf>
+            <ospfv3>
+              <enable>no</enable>
+            </ospfv3>
+          </protocol>
+          <interface>
+            <member>{{ dhcp_vlan_interface }}</member>
+          </interface>
+          <routing-table>
+            <ip>
+              <static-route>
+                <entry name="route to original virtual">
+                  <path-monitor>
+                    <enable>no</enable>
+                    <failure-condition>any</failure-condition>
+                    <hold-time>2</hold-time>
+                  </path-monitor>
+                  <nexthop>
+                    <next-vr>{{ original_vr }}</next-vr>
+                  </nexthop>
+                  <bfd>
+                    <profile>None</profile>
+                  </bfd>
+                  <metric>10</metric>
+                  <destination>0.0.0.0/0</destination>
+                  <route-table>
+                    <unicast/>
+                  </route-table>
+                </entry>
+              </static-route>
+            </ip>
+          </routing-table>
+        </entry>
+
+  - name: udpate_existing_vr_route_to_new_vr
+    xpath: /config/devices/entry[@name="localhost.localdomain"]/network/virtual-router/entry[@name="{{ original_vr }}"]
+    element: |-
+        <routing-table>
+            <ip>
+              <static-route>
+                <entry name="route to DHCP_VR">
+                  <path-monitor>
+                    <enable>no</enable>
+                    <failure-condition>any</failure-condition>
+                    <hold-time>2</hold-time>
+                  </path-monitor>
+                  <nexthop>
+                    <next-vr>DHCP_VR</next-vr>
+                  </nexthop>
+                  <bfd>
+                    <profile>None</profile>
+                  </bfd>
+                  <metric>10</metric>
+                  <destination>{{ dhcp_vlan_interface_ip }}/32</destination>
+                  <route-table>
+                    <unicast/>
+                  </route-table>
+                </entry>
+              </static-route>
+            </ip>
+          </routing-table>
+
+  # apply the DHCP server configuration to a new interface
+  - name: config_new_dhcp_server
+    xpath: /config/devices/entry[@name='localhost.localdomain']/network/dhcp/interface/entry[@name='{{ dhcp_vlan_interface }}']
+    element: |-
+      {{ dhcp_server_config }}
+
+  # delete original dhcp server
+  - name: delete_original_dhcp_server
+    cmd: delete
+    xpath: /config/devices/entry[@name='localhost.localdomain']/network/dhcp/interface/entry[@name='ethernet1/2']
+
+  # config dhcp relay from original interface to new vlan interface
+  - name: dhcp_relay_to_new_server
+    xpath: /config/devices/entry[@name='localhost.localdomain']/network/dhcp/interface/entry[@name='{{ dhcp_server_interface }}']/relay
+    element: |-
+      <ip>
+        <server>
+          <member>{{ dhcp_vlan_interface_ip }}/32</member>
+        </server>
+        <enabled>yes</enabled>
+      </ip>
