@@ -9,7 +9,7 @@ you through this process.
 * Add Security Policies to firewall via Homeskillet add-ons skillet
 * Turn off zone protect profiles
 
-# Setting up Client side Linuxbox
+## Setting up Client side Linuxbox
 You want to map your Client address to match the NGFW interface address.
 You also need to set up your routing table to allow the Client to route to remote
 networks. This section will walk you through that process. You will be using Paho to
@@ -26,7 +26,7 @@ connect to the Broker and publish messages(Paho-MQTT)
     + ```sudo ip route add {remote network IP} via {current routing gateway IP} dev {Linux interface}```
 
 
-# Setting up Broker side Linuxbox
+## Setting up Broker side Linuxbox
 You need to install MQTT on the broker side in order to have the
 Client publish messages and subscribe to topics. You also need to
 alter the routing table of the Broker to be able to route to remote
@@ -38,7 +38,7 @@ networks.
     + ```sudo ip route add {remote network IP} via {current routing gateway IP} dev {Linux interface}```
 
 
-# Running the IoT traffic generator
+## Running the IoT traffic generator
 Requires Linux host such as Ubuntu to run
 
 Prior to running the script be sure to do ``` make ```  
@@ -48,3 +48,15 @@ The command to run the traffic generation script is
 
 `sudo python3 iot_traffic.py`
 
+
+## Delete IoT Client Logical Interfaces
+
+For testing or a demo the `delete_intf.py` script will remove all interfaces with
+the specified prefix string.
+
+```bash
+sudo python delete_intf.py -p iot
+```
+
+> :warning: removing interfaces should be done with caution. Ensure the prefix string
+> matches only the logical interfaces added, by default using iot.
