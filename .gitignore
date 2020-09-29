@@ -1,6 +1,7 @@
 # pycharm and vscode files
 .idea/
 .vscode/
+.tox/
 
 # python virtual environments
 env/

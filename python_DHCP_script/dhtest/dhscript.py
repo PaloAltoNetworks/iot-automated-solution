@@ -11,20 +11,20 @@ else:
     # subprocess.getoutput would not handle binary output
     def getoutput(cmd):
         try:
-            out = subprocess.run(cmd, text=False, shell=True,
-                                timeout=60, stdout=subprocess.PIPE)
+            out = subprocess.run(cmd, text=False, shell=True, timeout=60, stdout=subprocess.PIPE)
             return out.stdout
-        except subprocess.TimeoutExpired as e:
+        except subprocess.TimeoutExpired:
             return b'ERROR: Timeout'
 
-#reset script log file
+# reset script log file
 with open('dhscript_log.txt', 'w') as f:
     f.write('')
     f.close
 
-#print_log(- prints the output to both stdout and file
+
+# print_log(- prints the output to both stdout and file
 def print_log(msg, cmd=None):
-    if cmd != None:
+    if cmd is not None:
         msg_full = msg + cmd + "\n"
     else:
         msg_full = msg + "\n"
@@ -34,12 +34,14 @@ def print_log(msg, cmd=None):
         f.write(msg_full)
         f.close
 
-#write_log - write the output to file
+
+# write_log - write the output to file
 def write_log(msg):
     with open('dhscript_log.txt', 'ab') as f:
         msg_full = msg + b"\n"
         f.write(msg_full)
         f.close
+
 
 def run_dhtest(mac, arg_list, search_output):
     cmd = "./dhtest -i eth0 -m " + mac + arg_list
@@ -76,8 +78,8 @@ def run_dhtest(mac, arg_list, search_output):
 #  -p, --padding                         # Add padding to packet to be at least 300 bytes
 #  -P, --port            [ port ]        # Use port instead of 67
 #  -g, --giaddr          [ giaddr ]      # Use giaddr instead of 0.0.0.0
-#  -u, --unicast         [ ip ]          # Unicast request, IP is optional. If not specified, the interface address will be used. 
-#  -a, --nagios                          # Nagios output format. 
+#  -u, --unicast         [ ip ]          # Unicast request, IP is optional. If not specified, the interface address will be used.
+#  -a, --nagios                          # Nagios output format.
 #  -S, --server          [ address ]     # Use server address instead of 255.255.255.255
 #  -D, --decline                         # Declines obtained DHCP IP for corresponding MAC
 #  -V, --verbose                         # Prints DHCP offer and ack details
