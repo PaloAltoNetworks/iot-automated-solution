@@ -6,12 +6,12 @@ traffic generation
 
 ## Prerequisites
 
-    * Cortex Data Lake license activated
+    * Cortex Data Lake license activated, preferably in the Customer Support Portal 
     * Cortex Data Lake NGFW onboarding Pre-Shared Key generated/captured
     * NGFW serial number activated for Cortex IoT
-    * panHandler: import the github repo panos-logging-skillets
+    * panHandler: import the Github repo panos-logging-skillets
     * panHandler 4.0 or later if used to play skillets and playbooks
-    * existing firewall configuration with interfaces, zones, policies
+    * Existing firewall configuration with interfaces, zones, policies
 
 ## IoT Configuration Workflow
 
@@ -24,27 +24,30 @@ The workflow provides a simple web form menu to select elements for Cortex Data 
 and IoT readiness including:
 
     * Cortex Data Lake (CDL) implementation Ansible playbook
-    * Update log-forwarding profiles with CDL and Enhancement Application logging
+    * Update log-forwarding profiles with CDL and Enhancement Application logging. 
     * For 10.x NGFW DHCP servers, enable DHCP session broadcast
     * For pre-10.x NGFW DHCP servers, convert to a logic interface server and DHCP relay
     * Add a DHCP security policy for visbility
     * Configuration/system validation checks for CDL and IoT configuration elements
     
-## IoT Configuration Skillets
+For more details about each element in the IoT Configuration workflow, navigate to the according
+subdirectory to view additional READMEs. 
+    
+### IoT Configuration Skillets
 
 
-Working in tandem with the workflow, simple configuration skillets designed to 
-update the NGFW configuration to be CDL/IoT ready.
+Simple configuration skillets designed to update the NGFW configuration to be CDL/IoT ready
+and are used by the above IoT Configuration Workflow.
 
-## IoT Validation Skillet
+### IoT Validation Skillet
 
 
 Validate key CDL and IoT NGFW elements to help users discover missing elements
-required for IoT readiness
+required for IoT readiness. Used by the above IoT Configuration Workflow.
 
 ## IoT POC built using HomeSkillet Add-on Configuration
 
-Augment the HomeSkillet configuration for an IoT configuration and POC.
+Augment the HomeSkillet configuration for an IoT configuration and PoC.
 
     * Leverage the IoT workflow elements for CDL and IoT readiness
     * Additional interface configuration for an IoT broker server
