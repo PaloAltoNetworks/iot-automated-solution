@@ -42,7 +42,7 @@ snippets:
     variable: config
     outputs:
       - name: original_zone
-        capture_value: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/zone/entry/network/layer3/member[text()='ethernet1/2']/../../../@name
+        capture_value: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/zone/entry/network/layer3/member[text()='{{ dhcp_server_interface }}']/../../../@name
       - name: original_vr
         capture_value: /config/devices/entry[@name='localhost.localdomain']/network/virtual-router/entry/interface/member[text()='{{ dhcp_server_interface }}']/../../@name
 
@@ -183,7 +183,7 @@ snippets:
   # delete original dhcp server
   - name: delete_original_dhcp_server
     cmd: delete
-    xpath: /config/devices/entry[@name='localhost.localdomain']/network/dhcp/interface/entry[@name='ethernet1/2']
+    xpath: /config/devices/entry[@name='localhost.localdomain']/network/dhcp/interface/entry[@name='{{ dhcp_server_interface }}']
 
   # config dhcp relay from original interface to new vlan interface
   - name: dhcp_relay_to_new_server
