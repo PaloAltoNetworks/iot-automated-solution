@@ -41,11 +41,11 @@ snippets:
     outputs:
           # let's capture a variable called 'connected_server_ip'
       - name: logging_service_expired
-        capture_value: ./entry/description[text()="Device Logging Service"]/../expired/text()
+        capture_value: ./entry/feature[text()="Logging Service"]/../expired/text()
       - name: logging_service_capacity
-        capture_value: ./entry/description[text()="Device Logging Service"]/../custom/_Log_Storage_TB/text()
+        capture_value: ./entry/feature[text()="Logging Service"]/../custom/_Log_Storage_TB/text()
       - name: logging_service_expires
-        capture_value: ./entry/description[text()="Device Logging Service"]/../expires/text()
+        capture_value: ./entry/feature[text()="Logging Service"]/../expires/text()
 
   - name: logging_service_active
     label: Logging Service is licensed and not expired
@@ -69,9 +69,9 @@ snippets:
     output_type: xml
     outputs:
       - name: iot_subscription_expired
-        capture_value: ./entry/description[text()="IoT Security"]/../expired/text()
+        capture_value: ./entry/feature[text()="IoT Security"]/../expired/text()
       - name: iot_subscription_expires
-        capture_value: ./entry/description[text()="IoT Security"]/../expires/text()
+        capture_value: ./entry/feature[text()="IoT Security"]/../expires/text()
 
   - name: iot_subscription_active
     label: IoT Service is licensed and not expired
