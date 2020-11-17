@@ -61,6 +61,29 @@ snippets:
       https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/
       get-started-with-cortex-data-lake/license-activation.html
 
+  # check that the NGFW is licensed for IoT
+  - name: get_system_info
+    cmd: cli
+    # This cli command will return xml
+    cmd_str: request license info
+    output_type: xml
+    outputs:
+      - name: iot_subscription_expired
+        capture_value: ./entry/description[text()="IoT Security"]/../expired/text()
+      - name: iot_subscription_expires
+        capture_value: ./entry/description[text()="IoT Security"]/../expires/text()
+
+  - name: iot_subscription_active
+    label: IoT Service is licensed and not expired
+    test:  iot_subscription_expired == "no"
+    fail_message: |
+      The IoT service is not licensed or the license has expired for this device
+      License expiration date is {{ iot_subscription_expires }}
+    pass_message: |
+      License expiration date is {{ iot_subscription_expires }}
+    documentation_link: |
+      https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/onboard-iot-security.html
+
   - name: device_config_file
     cmd: parse
     variable: config
