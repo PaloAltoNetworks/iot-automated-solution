@@ -76,6 +76,8 @@ variables:
     cbx_list:
       - key: convert DHCP server to DHCP relay
         value: v9x_convert_dhcp_relay
+      - key: enable Multicast Firewalling when using Virtual Wire
+        value: vwire_enable_mcast_fw
 
   - name: policy_options
     description: select IoT recommended security policy options
@@ -127,7 +129,7 @@ snippets:
 
 # 10x enable vware multicast firewalling
   - name: iot_panos_enable_vwire_mcast_fw
-    when: "('vwire_enable_mcast_fw' in v10x_options) and ('v10.x' in workflow_sw_version)"
+    when: "(('vwire_enable_mcast_fw' in v10x_options) and ('v10.x' in workflow_sw_version)) or (('vwire_enable_mcast_fw' in v9x_options) and ('v9.x' in workflow_sw_version))"
 
 # 9x convert DHCP server to DHCP relay per config guide
   - name: iot_move_dhcp_server_to_dhcp_relay
