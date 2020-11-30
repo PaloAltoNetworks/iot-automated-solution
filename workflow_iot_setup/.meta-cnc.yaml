@@ -28,9 +28,23 @@ variables:
     default: admin
     type_hint: password
 
+  - name: cdl_options
+    description: Select Cortex Data Lake (CDL) and Enhanced Application Logging (EAL) options
+    default: []
+    type_hint: checkbox
+    cbx_list:
+      - key: Activate and configure CDL on the NGFW.
+        value: setup_cdl
+      - key: Enable CDL and EAL on existing log-forwarding profile.
+        value: modify_log_profile
+      - key: Add new log forwarding profile that is CDL- and EAL-ready.
+        value: create_log_forwarding_profile
+      - key: Update security rules with CDL- and EAL-ready log-forwarding profile.
+        value: add_logging_to_security_rules
+
   # initial workflow with user inputs - future version will capture the software version
   - name: workflow_sw_version
-    description: choose the IronSkillet version you want to load
+    description: What PAN-OS version is the NGFW running?
     default: v10.x
     type_hint: dropdown
     dd_list:
@@ -39,62 +53,48 @@ variables:
       - key: v10.x
         value: v10.x
 
-  - name: cdl_options
-    description: select Cortex Data Lake options
-    default: []
-    type_hint: checkbox
-    cbx_list:
-      - key: activate and configure Cortex Data Lake
-        value: setup_cdl
-      - key: add CDL and EAL to existing log-forwarding profile
-        value: modify_log_profile
-      - key: add new log forwarding profile that is CDL and EAL ready
-        value: create_log_forwarding_profile
-      - key: update security rules with CDL-EAL ready logging profile
-        value: add_logging_to_security_rules
-
   - name: v10x_options
-    description: select PAN-OS 10.x options for IoT readiness
+    description: Select PAN-OS 10.x configuration options for IoT readiness.
     default: []
     type_hint: checkbox
     toggle_hint:
       source: workflow_sw_version
       value: 'v10.x'
     cbx_list:
-      - key: enable DHCP broadcast session if local DHCP server
+      - key: If NGFW is acting as a DHCP server, enable DHCP broadcast session.
         value: v10x_enable_dhcp_broadcast
-      - key: enable Multicast Firewalling when using Virtual Wire
+      - key: If DHCP traffic is traversing a vwire, enable Multicast Firewalling.
         value: vwire_enable_mcast_fw
 
   - name: v9x_options
-    description: select PAN-OS 9.x options for IoT readiness
+    description: Select PAN-OS 9.x configuration options for IoT readiness.
     default: []
     type_hint: checkbox
     toggle_hint:
       source: workflow_sw_version
       value: 'v9.x'
     cbx_list:
-      - key: convert DHCP server to DHCP relay
+      - key: If NGFW is acting as a DHCP server, convert DHCP server to DHCP relay.
         value: v9x_convert_dhcp_relay
-      - key: enable Multicast Firewalling when using Virtual Wire
+      - key: If DHCP traffic is traversing a vwire, enable Multicast Firewalling.
         value: vwire_enable_mcast_fw
 
   - name: policy_options
-    description: select IoT recommended security policy options
+    description: Select IoT recommended security policy options.
     default: []
     type_hint: checkbox
     cbx_list:
-      - key: add DHCP security policy for named zones
+      - key: Add DHCP security policy for named zones.
         value: add_dhcp_security_policy
 
   - name: assess_options
-    description: IoT configuration and status validations
+    description: Select IoT configuration and status validations.
     default: []
     type_hint: checkbox
     cbx_list:
-      - key: validate IoT configuration at the beginning of the workflow
+      - key: Validate IoT configuration at the beginning of the workflow.
         value: run_iot_validation_begin
-      - key: validate IoT configuration at the end of the workflow
+      - key: Validate IoT configuration at the end of the workflow.
         value: run_iot_validation_end
 
 snippets:
@@ -127,7 +127,7 @@ snippets:
   - name: panos_enable_dhcp_session_broadcast
     when: "('v10x_enable_dhcp_broadcast' in v10x_options) and ('v10.x' in workflow_sw_version)"
 
-# 10x enable vware multicast firewalling
+# enable vwire multicast firewalling
   - name: iot_panos_enable_vwire_mcast_fw
     when: "(('vwire_enable_mcast_fw' in v10x_options) and ('v10.x' in workflow_sw_version)) or (('vwire_enable_mcast_fw' in v9x_options) and ('v9.x' in workflow_sw_version))"
 
