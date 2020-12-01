@@ -14,6 +14,16 @@ labels:
     - lib
 
 variables:
+  # initial workflow with user inputs - future version will capture the software version
+  - name: workflow_sw_version
+    description: What PAN-OS version is the NGFW running?
+    default: v10.x
+    type_hint: dropdown
+    dd_list:
+      - key: v9.x
+        value: v9.x
+      - key: v10.x
+        value: v10.x
 
   - name: dhcp_setup
     description: DHCP related checks
@@ -94,7 +104,8 @@ snippets:
   - name: device_cert_validate
     label: Device Certificate is installed and vaild
     test:  device_cert_valid == "Valid"
-    severity: high
+    severity: low
+    when: "'v10.x' in workflow_sw_version"
     fail_message: |
       The Device Certificate is not installed or is not valid on the firewall.
     pass_message: |
