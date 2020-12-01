@@ -50,7 +50,6 @@ snippets:
   - name: logging_service_active
     label: Logging Service is licensed and not expired
     test:  logging_service_expired == "no"
-
     fail_message: |
       Logging service is not licensed or the license has expired for this device
       License expiration date is {{ logging_service_expires }}
@@ -72,7 +71,6 @@ snippets:
         capture_value: ./entry/feature[text()="IoT Security"]/../expired/text()
       - name: iot_subscription_expires
         capture_value: ./entry/feature[text()="IoT Security"]/../expires/text()
-
   - name: iot_subscription_active
     label: IoT Service is licensed and not expired
     test:  iot_subscription_expired == "no"
@@ -83,6 +81,28 @@ snippets:
       License expiration date is {{ iot_subscription_expires }}
     documentation_link: |
       https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/onboard-iot-security.html
+
+    # Check that the v10.x firewall has the device certificate installed
+  - name: get_device_cert_info
+    cmd: cli
+    cmd_str: show device-certificate status
+    output_type: xml
+    outputs:
+      - name: device_cert_exists
+        capture_value: ./entry
+
+  - name: device_cert_valid
+    label: Device Certificate is installed and vaild
+    test:  device_cert_exists == "yes"
+    severity: high
+    when: "'v10.x' in workflow_sw_version"
+    fail_message: |
+      The Device Certificate is not installed or is not valid on the firewall.
+      License expiration date is {{ device_cert_exists }}
+    pass_message: |
+      License expiration date is {{ device_cert_exists }}
+    documentation_link: |
+      https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/prepare-your-firewall-for-iot-security.html
 
   - name: device_config_file
     cmd: parse
