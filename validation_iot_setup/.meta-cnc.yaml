@@ -89,7 +89,7 @@ snippets:
     output_type: xml
     outputs:
       - name: device_cert_valid
-        capture_value: ./system/device-certificate-status/text()
+        capture_value: /system/device-certificate-status/text()
 
   - name: device_cert_validate
     label: Device Certificate is installed and vaild
