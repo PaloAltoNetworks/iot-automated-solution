@@ -89,7 +89,7 @@ snippets:
     output_type: xml
     outputs:
       - name: device_cert_exists
-        capture_value: ./entry/text()
+        capture_value: /entry
 
   - name: device_cert_valid
     label: Device Certificate is installed and vaild
@@ -100,7 +100,7 @@ snippets:
       The Device Certificate is not installed or is not valid on the firewall.
       License expiration date is {{ device_cert_exists }}
     pass_message: |
-      License expiration date is {{ device_cert_exists }}
+      The Device Certificate is installed and valid.
     documentation_link: |
       https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/prepare-your-firewall-for-iot-security.html
 
