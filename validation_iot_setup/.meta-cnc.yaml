@@ -83,22 +83,20 @@ snippets:
       https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/onboard-iot-security.html
 
     # Check that the v10.x firewall has the device certificate installed
-  - name: get_device_cert_info
+  - name: get_device_cert_status
     cmd: cli
-    cmd_str: show device-certificate status
+    cmd_str: show system info
     output_type: xml
     outputs:
-      - name: device_cert_exists
-        capture_value: /entry
+      - name: device_cert_valid
+        capture_value: ./system/device-certificate-status/text()
 
-  - name: device_cert_valid
+  - name: device_cert_validate
     label: Device Certificate is installed and vaild
-    test:  device_cert_exists == "yes"
+    test:  device_cert_valid == "Valid"
     severity: high
-    when: "'v10.x' in workflow_sw_version"
     fail_message: |
       The Device Certificate is not installed or is not valid on the firewall.
-      License expiration date is {{ device_cert_exists }}
     pass_message: |
       The Device Certificate is installed and valid.
     documentation_link: |
