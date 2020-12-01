@@ -33,13 +33,13 @@ variables:
     default: []
     type_hint: checkbox
     cbx_list:
-      - key: Activate and configure CDL on the NGFW.
+      - key: Activate and configure CDL on the NGFW
         value: setup_cdl
-      - key: Enable CDL and EAL on existing log-forwarding profile.
+      - key: Enable CDL and EAL on existing log-forwarding profile
         value: modify_log_profile
-      - key: Add new log forwarding profile that is CDL- and EAL-ready.
+      - key: Add new log forwarding profile that is CDL- and EAL-ready
         value: create_log_forwarding_profile
-      - key: Update security rules with CDL- and EAL-ready log-forwarding profile.
+      - key: Update security rules with CDL- and EAL-ready log-forwarding profile
         value: add_logging_to_security_rules
 
   # initial workflow with user inputs - future version will capture the software version
@@ -54,47 +54,49 @@ variables:
         value: v10.x
 
   - name: v10x_options
-    description: Select PAN-OS 10.x configuration options for IoT readiness.
+    description: Select PAN-OS 10.x configuration options for IoT readiness
     default: []
     type_hint: checkbox
     toggle_hint:
       source: workflow_sw_version
       value: 'v10.x'
     cbx_list:
-      - key: If NGFW is acting as a DHCP server, enable DHCP broadcast session.
+      - key: Enable Device-ID on IoT source zone
+        value: v10x_enable_device_id_zone
+      - key: If NGFW is acting as a DHCP server, enable DHCP broadcast session
         value: v10x_enable_dhcp_broadcast
-      - key: If DHCP traffic is traversing a vwire, enable Multicast Firewalling.
+      - key: If DHCP traffic is traversing a vwire, enable Multicast Firewalling
         value: vwire_enable_mcast_fw
 
   - name: v9x_options
-    description: Select PAN-OS 9.x configuration options for IoT readiness.
+    description: Select PAN-OS 9.x configuration options for IoT readiness
     default: []
     type_hint: checkbox
     toggle_hint:
       source: workflow_sw_version
       value: 'v9.x'
     cbx_list:
-      - key: If NGFW is acting as a DHCP server, convert DHCP server to DHCP relay.
+      - key: If NGFW is acting as a DHCP server, convert DHCP server to DHCP relay
         value: v9x_convert_dhcp_relay
-      - key: If DHCP traffic is traversing a vwire, enable Multicast Firewalling.
+      - key: If DHCP traffic is traversing a vwire, enable Multicast Firewalling
         value: vwire_enable_mcast_fw
 
   - name: policy_options
-    description: Select IoT recommended security policy options.
+    description: Select IoT recommended security policy options
     default: []
     type_hint: checkbox
     cbx_list:
-      - key: Add DHCP security policy for named zones.
+      - key: Add DHCP security policy for named zones
         value: add_dhcp_security_policy
 
   - name: assess_options
-    description: Select IoT configuration and status validations.
+    description: Select IoT configuration and status validations
     default: []
     type_hint: checkbox
     cbx_list:
-      - key: Validate IoT configuration at the beginning of the workflow.
+      - key: Validate IoT configuration at the beginning of the workflow
         value: run_iot_validation_begin
-      - key: Validate IoT configuration at the end of the workflow.
+      - key: Validate IoT configuration at the end of the workflow
         value: run_iot_validation_end
 
 snippets:
@@ -122,6 +124,10 @@ snippets:
 # add or update logging profile used in security rules
   - name: iot_add_logging_to_security_rules
     when: "'add_logging_to_security_rules' in cdl_options"
+
+# 10x enable device id per zone
+  - name: iot_panos_enable_device_id_zone
+    when: "('v10x_enable_device_id_zone' in v10x_options) and ('v10.x' in workflow_sw_version)"
 
 # 10x enable dhcp session broadcast
   - name: panos_enable_dhcp_session_broadcast

@@ -1,0 +1,28 @@
+# skillet to update virtual wire entries with multicast firewalling
+# enables the NGFW to captured EAL log data for DHCP broadcast sessions
+name: iot_panos_enable_device_id_zone
+label: Enable Device-ID on Source Zone
+description: Used to enable Device-ID in the source zone to detect devices and enforce security policy.
+type: panos
+labels:
+  collection:
+    - lib
+
+variables:
+
+  - name: zones_to_update
+    description: zones to update with Device-ID enabled
+    default: ['']
+    type_hint: checkbox
+    source: zone_names
+
+snippets:
+
+- name: zone_enable_device_id
+  xpath: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/zone
+  element: |-
+    {%- for zone in zones_to_update %}
+      <entry name="{{ zone }}">
+       <enable-device-identification>yes</enable-device-identification>
+      </entry>
+    {%- endfor %}
