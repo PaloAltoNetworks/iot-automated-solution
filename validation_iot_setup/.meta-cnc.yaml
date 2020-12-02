@@ -98,18 +98,18 @@ snippets:
     cmd_str: show system info
     output_type: xml
     outputs:
-      - name: device_cert_valid
+      - name: verify_device_cert
         capture_value: ./device-certificate-status/text()
 
   - name: device_cert_validate
-    label: Device Certificate is installed and vaild
-    test:  device_cert_valid == "Valid"
+    label: Device Certificate is installed and valid
+    test:  (verify_device_cert == "Valid" and verify_device_cert != "None")
     severity: low
     when: "'v10.x' in workflow_sw_version"
     fail_message: |
-      The Device Certificate is not installed or is not valid on the firewall.
+      The Device Certificate is not installed or is not valid on the firewall. status is {{ verify_device_cert }}.
     pass_message: |
-      The Device Certificate is installed and valid.
+      The Device Certificate is installed and valid. status is {{ verify_device_cert }}.
     documentation_link: |
       https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/prepare-your-firewall-for-iot-security.html
 
