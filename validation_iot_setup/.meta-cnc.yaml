@@ -56,7 +56,6 @@ snippets:
         capture_value: ./entry/feature[text()="Logging Service"]/../custom/_Log_Storage_TB/text()
       - name: logging_service_expires
         capture_value: ./entry/feature[text()="Logging Service"]/../expires/text()
-
   - name: logging_service_active
     label: Logging Service is licensed and not expired
     test:  logging_service_expired == "no"
@@ -92,6 +91,32 @@ snippets:
     documentation_link: |
       https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/onboard-iot-security.html
 
+
+
+
+  # check that the NGFW is licensed for TP
+  - name: get_system_info
+    cmd: cli
+    # This cli command will return xml
+    cmd_str: request license info
+    output_type: xml
+    outputs:
+      - name: threat_prevention_expired
+        capture_value: ./entry/feature[text()="Threat Prevention"]/../expired/text()
+      - name: threat_prevention_expires
+        capture_value: ./entry/feature[text()="Threat Prevention"]/../expires/text()
+  - name: threat_prevention_active
+    label: Threat Prevention is licensed and not expired
+    test:  threat_prevention_expired == "no"
+    fail_message: |
+      Threat Prevention is not licensed or the license has expired for this device
+      License expiration date is {{ threat_prevention_expires }}
+    pass_message: |
+      Threat Prevention is licensed and not expired
+      License expiration date is {{ threat_prevention_expires }}
+    documentation_link: |
+      https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/iot-security-prerequisites.html
+
     # Check that the v10.x firewall has the device certificate installed
   - name: get_device_cert_status
     cmd: cli
@@ -100,7 +125,6 @@ snippets:
     outputs:
       - name: verify_device_cert
         capture_value: ./device-certificate-status/text()
-
   - name: device_cert_validate
     label: Device Certificate is installed and valid
     test:  (verify_device_cert == "Valid" and verify_device_cert != "None")
