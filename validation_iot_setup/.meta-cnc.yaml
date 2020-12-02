@@ -43,7 +43,7 @@ snippets:
 # example output capture and test structure layout
 
   # check that logging service license exists and not expired
-  - name: get_system_info
+  - name: get_system_info_logging
     cmd: cli
     # This cli command will return xml
     cmd_str: request license info
@@ -70,7 +70,7 @@ snippets:
       get-started-with-cortex-data-lake/license-activation.html
 
   # check that the NGFW is licensed for IoT
-  - name: get_system_info
+  - name: get_system_info_iot
     cmd: cli
     # This cli command will return xml
     cmd_str: request license info
@@ -95,7 +95,7 @@ snippets:
 
 
   # check that the NGFW is licensed for TP
-  - name: get_system_info
+  - name: get_system_info_tp
     cmd: cli
     # This cli command will return xml
     cmd_str: request license info
