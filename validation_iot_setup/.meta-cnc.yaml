@@ -121,7 +121,6 @@ snippets:
   - name: device_cert_validate_test
     label: Device Certificate is installed and valid
     test:  verify_device_cert == "Valid"
-    severity: low
     when: "'v10.x' in workflow_sw_version"
     fail_message: |
       The Device Certificate is not installed or is not valid on the firewall.
@@ -240,7 +239,7 @@ snippets:
     label: CDL certificate has not expired
     test: certificate_expired == "No"
     fail_message: |
-      Certificate has expired
+      Certificate has expired or is not valid.
     pass_message: Certificate is valid
     documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
   # CDL customer region captured
@@ -308,7 +307,6 @@ snippets:
     # the complex output uses a captured dict object and iterates across profiles and rules
     # looking for specific entries not sending to panorama aka cortex data lake
     test: (profiles_not_sending_panorama | length == 0) and (sending_to_panorama_enabled | length != 0)
-    severity: high
     fail_message: |
       {%- if (profiles_not_sending_panorama | length == 0) and (sending_to_panorama_enabled | length == 0) %}
       No log forwarding profiles were found.
@@ -386,7 +384,6 @@ snippets:
   #if this test passes that means there is nothing in eal_not_enabled
   #meaning that every profile currently has eal enabled
     test: (eal_not_enabled | length == 0) and (eal_enabled | length != 0)
-    severity: high
     fail_message: |
       {%- if (eal_not_enabled | length == 0) and (eal_enabled | length == 0) %}
       No log forwarding profiles were found.
@@ -411,7 +408,6 @@ snippets:
   - name: dhcp_broadcast_enabled_test
     label: DHCP Broadcast Session must be Enabled for local DHCP Server EAL Logging
     test: dhcp_broadcast_enabled == 'yes'
-    severity: high
     when: "'dhcp_server_checks' in dhcp_setup"
     fail_message: |
       DHCP Broadcast Session is not enabled
@@ -439,7 +435,6 @@ snippets:
   - name: vwire_multicast_firewalling_test
     label: Virtual Wire Multicast Firewaling enabled for local DHCP Server EAL Logging
     test: (vwire_mcast_firewalling_not_enabled | length == 0) and (vwire_mcast_firewalling_enabled | length != 0)
-    severity: high
     when: "'using_vwire' in dhcp_setup"
     fail_message: |
       {%- if (vwire_mcast_firewalling_not_enabled | length == 0) and (vwire_mcast_firewalling_enabled | length == 0) %}
@@ -468,7 +463,6 @@ snippets:
   - name: dhcp_relay_configured_test
     label: At least one instance of DHCP relay configured
     test: dhcp_relay_interfaces | length
-    severity: high
     when: "'dhcp_relay_checks' in dhcp_setup"
     fail_message: |
       DHCP relay not configured on this device
