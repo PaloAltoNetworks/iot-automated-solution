@@ -43,7 +43,7 @@ snippets:
 # example output capture and test structure layout
 
   # Logging Service is licensed and not expired
-  - name: get_system_info_logging
+  - name: logging_service_active_capture
     cmd: cli
     # This cli command will return xml
     cmd_str: request license info
@@ -56,12 +56,11 @@ snippets:
         capture_value: ./entry/feature[text()="Logging Service"]/../custom/_Log_Storage_TB/text()
       - name: logging_service_expires
         capture_value: ./entry/feature[text()="Logging Service"]/../expires/text()
-  - name: logging_service_active
+  - name: logging_service_active_test
     label: Logging Service is licensed and not expired
     test:  logging_service_expired == "no"
     fail_message: |
       Logging service is not licensed or the license has expired for this device
-      License expiration date is {{ logging_service_expires }}
     pass_message: |
       Logging Service is licensed and active with {{ logging_service_capacity }}TB of logging
       License expiration date is {{ logging_service_expires }}
@@ -70,7 +69,7 @@ snippets:
       get-started-with-cortex-data-lake/license-activation.html
 
   # IoT Service is licensed and not expired
-  - name: get_system_info_iot
+  - name: iot_subscription_active_capture
     cmd: cli
     cmd_str: request license info
     output_type: xml
@@ -79,19 +78,18 @@ snippets:
         capture_value: ./entry/feature[text()="IoT Security"]/../expired/text()
       - name: iot_subscription_expires
         capture_value: ./entry/feature[text()="IoT Security"]/../expires/text()
-  - name: iot_subscription_active
+  - name: iot_subscription_active_test
     label: IoT Service is licensed and not expired
     test:  iot_subscription_expired == "no"
     fail_message: |
       The IoT service is not licensed or the license has expired for this device
-      License expiration date is {{ iot_subscription_expires }}
     pass_message: |
       License expiration date is {{ iot_subscription_expires }}
     documentation_link: |
       https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/onboard-iot-security.html
 
   # Threat Prevention is licensed and not expired
-  - name: get_system_info_tp
+  - name: threat_prevention_active_capture
     cmd: cli
     # This cli command will return xml
     cmd_str: request license info
@@ -101,12 +99,11 @@ snippets:
         capture_value: ./entry/feature[text()="Threat Prevention"]/../expired/text()
       - name: threat_prevention_expires
         capture_value: ./entry/feature[text()="Threat Prevention"]/../expires/text()
-  - name: threat_prevention_active
+  - name: threat_prevention_active_test
     label: Threat Prevention is licensed and not expired
     test:  threat_prevention_expired == "no"
     fail_message: |
       Threat Prevention is not licensed or the license has expired for this device
-      License expiration date is {{ threat_prevention_expires }}
     pass_message: |
       Threat Prevention is licensed and not expired
       License expiration date is {{ threat_prevention_expires }}
@@ -114,14 +111,14 @@ snippets:
       https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/iot-security-prerequisites.html
 
   # Device Certificate is installed and valid (10.x only)
-  - name: get_device_cert_status
+  - name: device_cert_validate_capture
     cmd: cli
     cmd_str: show system info
     output_type: xml
     outputs:
       - name: verify_device_cert
         capture_value: ./device-certificate-status/text()
-  - name: device_cert_validate
+  - name: device_cert_validate_test
     label: Device Certificate is installed and valid
     test:  verify_device_cert == "Valid"
     severity: low
@@ -134,7 +131,7 @@ snippets:
       https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/prepare-your-firewall-for-iot-security.html
 
   # Cortex Data Lake enabled in global configuration
-  - name: device_config_file
+  - name: cdl_enabled_capture
     cmd: parse
     variable: config
     outputs:
@@ -148,7 +145,7 @@ snippets:
     pass_message: CDL is globally enabled
     documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
   # Cortex Data Lake logging region is configured
-  - name: device_config_file
+  - name: logging_service_regions_capture
     cmd: parse
     variable: config
     outputs:
@@ -162,7 +159,7 @@ snippets:
     pass_message: Firewall region is set as {{logging_service_regions}}
     documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
   # Enhanced Application Logging is globally enabled
-  - name: device_config_file
+  - name: enhanced_application_logging_enabled_capture
     cmd: parse
     variable: config
     outputs:
@@ -176,7 +173,7 @@ snippets:
     pass_message: EAL is globally enabled
     documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
   #	Checking if traffic logs are created
-  - name: get_logging_status
+  - name: last_log_created_capture
     cmd: cli
         # This cli command will return a text blob
     cmd_str: show logging-status
@@ -190,7 +187,7 @@ snippets:
       # this will capture ALL matches from the following regex as a list. No matches always return an empty list
       - name: all_cms
         capture_list: Not Sending to CMS (\d+)
-  - name: capture_last_log_created
+  - name: last_log_created_test
     label: Checking if traffic logs are created
     test: |
       (
@@ -202,7 +199,7 @@ snippets:
     pass_message: "{{capture_traffic_counters[0]}}"
     documentation_link: https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000CmMtCAK
   # Checking if traffic logs are forwarded
-  - name: capture_last_log_forwarded
+  - name: last_log_forwarded_test
     label: Checking if traffic logs are forwarded
     test: capture_traffic_counters[1] != "Not Available" and capture_traffic_counters[1] | length
     fail_message: |
@@ -210,7 +207,7 @@ snippets:
     pass_message: "{{capture_traffic_counters[1]}}"
     documentation_link: https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000CmMtCAK
   # CDL certificate chain is verified
-  - name: verification
+  - name: cdl_verification_capture
     cmd: cli
         # This cli command will return a text blob
     cmd_str: request logging-service-forwarding certificate info
@@ -247,7 +244,7 @@ snippets:
     pass_message: Certificate is valid
     documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
   # CDL customer region captured
-  - name: cortexDataLake
+  - name: cortexDataLake_capture
     cmd: cli
     cmd_str: request logging-service-forwarding customerinfo show
     when: cert_chain_verification == "OK"
@@ -258,7 +255,7 @@ snippets:
         capture_value: /custinfo/entry[@name="1"]/region-name/text()
       - name: CDLcustomerID
         capture_value: /custinfo/entry[@name="1"]/customer-id/text()
-  - name: CDLregion_test
+  - name: CDL_region_test
     label: CDL customer region captured
     test:  (cert_chain_verification == "OK") and (CDLregion | length)
     fail_message: |
@@ -266,7 +263,7 @@ snippets:
     pass_message: Firewall region is set as {{CDLregion}}
     documentation_link: https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000CmMtCAK
   # CDL customerID exists
-  - name: CDLcustomerID_test
+  - name: CDL_customerID_test
     label: CDL customerID exists
     test:  (cert_chain_verification == "OK") and (CDLcustomerID | length)
     fail_message: |
@@ -274,7 +271,7 @@ snippets:
     pass_message: Cortex Data Lake customer ID is set as {{CDLcustomerID}}
     documentation_link: https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000CmMtCAK
   # All profiles and rules are configured to forward to Cortex Data Lake
-  - name: device_config_file
+  - name: sending_to_panorama_enabled_capture
     cmd: parse
     variable: config
     outputs:
@@ -304,7 +301,7 @@ snippets:
         capture_object: |-
           /config/shared/log-settings/profiles/entry
 
-  - name: check_sending_to_panorama_enabled
+  - name: sending_to_panorama_enabled_test
     label: All profiles and rules are configured to forward to Cortex Data Lake
     # if this test passes that means there is nothing in profiles_not_sending_panorama
     # meaning that every profile is currently sending to panorama
@@ -361,7 +358,7 @@ snippets:
       all profiles are configured to forward to Cortex Data Lake
     documentation_link: https://docs.paloaltonetworks.com/pan-os/9-0/pan-os-admin/monitoring/configure-log-forwarding.html
   # Enhanced Application Logging is enabled for all log forwarding profiles
-  - name: device_config_file
+  - name: eal_enabled_per_profile_capture
     cmd: parse
     variable: config
     outputs:
@@ -380,7 +377,7 @@ snippets:
         capture_list: |-
           /config//log-settings/profiles/entry/@name
         filter_items: item not in eal_enabled
-  - name: check_eal_enabled
+  - name: eal_enabled_per_profile_test
     label: Enhanced Application Logging is enabled for all log forwarding profiles
   #if this test passes that means there is nothing in eal_not_enabled
   #meaning that every profile currently has eal enabled
@@ -393,7 +390,7 @@ snippets:
       all profiles have EAL enabled
     documentation_link: https://docs.paloaltonetworks.com/pan-os/8-1/pan-os-admin/monitoring/enhanced-application-logs
   # DHCP Broadcast Session must be Enabled for local DHCP Server EAL Logging
-  - name: device_config_file
+  - name: dhcp_broadcast_enabled_capture
     cmd: parse
     variable: config
     outputs:
@@ -403,7 +400,7 @@ snippets:
           /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting/session/dhcp-bcast-session-on/text()
 
 
-  - name: check_dhcp_broadcast_enabled
+  - name: dhcp_broadcast_enabled_test
     label: DHCP Broadcast Session must be Enabled for local DHCP Server EAL Logging
     test: dhcp_broadcast_enabled == 'yes'
     severity: high
@@ -417,7 +414,7 @@ snippets:
       /device/device-setup-session/session-settings.html
 
   # Virtual Wire Multicast Firewaling enabled for local DHCP Server EAL Logging
-  - name: device_config_file
+  - name: vwire_multicast_firewalling_capture
     cmd: parse
     variable: config
     outputs:
@@ -431,7 +428,7 @@ snippets:
       - name: vwire_mcast_firewalling_not_enabled
         capture_list: /config/devices/entry[@name='localhost.localdomain']/network/virtual-wire/entry/@name
         filter_items: item not in vwire_mcast_firewalling_enabled
-  - name: check_vwire_multicast_firewalling
+  - name: vwire_multicast_firewalling_test
     label: Virtual Wire Multicast Firewaling enabled for local DHCP Server EAL Logging
     test: vwire_mcast_firewalling_not_enabled | length == 0
     severity: high
@@ -446,7 +443,7 @@ snippets:
       virtual-wire-interfaces/configure-virtual-wires.html
 
   # At least one instance of DHCP relay configured
-  - name: device_config_file
+  - name: dhcp_relay_configured_capture
     cmd: parse
     variable: config
     outputs:
@@ -456,7 +453,7 @@ snippets:
         capture_list: |-
           /config/devices/entry[@name='localhost.localdomain']/network/dhcp/interface/entry/relay/../@name
 
-  - name: check_dhcp_relay_configured
+  - name: dhcp_relay_configured_test
     label: At least one instance of DHCP relay configured
     test: dhcp_relay_interfaces | length
     severity: high
