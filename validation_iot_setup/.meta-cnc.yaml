@@ -127,9 +127,9 @@ snippets:
     severity: low
     when: "'v10.x' in workflow_sw_version"
     fail_message: |
-      The Device Certificate is not installed or is not valid on the firewall. status is {{ verify_device_cert }}.
+      The Device Certificate is not installed or is not valid on the firewall.
     pass_message: |
-      The Device Certificate is installed and valid. status is {{ verify_device_cert }}.
+      The Device Certificate is installed and valid.
     documentation_link: |
       https://docs.paloaltonetworks.com/iot/iot-security-admin/get-started-with-iot-security/prepare-your-firewall-for-iot-security.html
 
@@ -250,7 +250,7 @@ snippets:
   - name: cortexDataLake
     cmd: cli
     cmd_str: request logging-service-forwarding customerinfo show
-    when: "cert_chain_verification is 'OK'"
+    when: cert_chain_verification == "OK"
     outputs:
       - name: fullResponse
         capture_object: /custinfo
@@ -258,7 +258,6 @@ snippets:
         capture_value: /custinfo/entry[@name="1"]/region-name/text()
       - name: CDLcustomerID
         capture_value: /custinfo/entry[@name="1"]/customer-id/text()
-
   - name: CDLregion_test
     label: CDL customer region captured
     test:  (cert_chain_verification == "OK") and (CDLregion | length)
@@ -274,7 +273,6 @@ snippets:
       No CDL Customer ID present, check if certificate fetch is successful
     pass_message: Cortex Data Lake customer ID is set as {{CDLcustomerID}}
     documentation_link: https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000CmMtCAK
-
   # All profiles and rules are configured to forward to Cortex Data Lake
   - name: device_config_file
     cmd: parse
