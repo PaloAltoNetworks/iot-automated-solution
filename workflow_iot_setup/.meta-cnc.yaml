@@ -29,7 +29,7 @@ variables:
     type_hint: password
 
   - name: assess_options
-    description: Select validations of NGFW's IoT-readiness
+    description: Automation Element One: IoT-Readiness Validations
     default: []
     type_hint: checkbox
     cbx_list:

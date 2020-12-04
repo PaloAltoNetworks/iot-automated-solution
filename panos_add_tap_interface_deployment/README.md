@@ -8,7 +8,7 @@ on the firewall before running this configuration skillet.
 Given an ethernet interface as an input, the skillet will:
 
 1. Configure the ethernet interface in tap mode
-2. Create a tap zone
+2. Create a tap zone with User-ID enabled
 3. Create Alert-All security profiles according to Iron-Skillet
 4. Create Alert-All security group
 5. Create a CDL- and EAL-ready log forwarding profile
