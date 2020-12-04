@@ -2,10 +2,11 @@
 # requires repo https://github.com/PaloAltoNetworks/panos-logging-skillets
 
 name: IoT_setup_workflow_panos
-label: NGFW add-on configurations for IOT
+label: NGFW Configurations for IOT-Readiness
 description: |
-  this workflow steps through the additional elements to make a NGFW IoT-ready
-  with a focus on Cortex Data Lake, Enhanced Application Logging, and DHCP
+  This workflow steps through the elements to make a NGFW IoT-ready with a
+  focus on Cortex Data Lake onboarding, DHCP topology configurations, and
+  validations.
 
 type: workflow
 
@@ -14,7 +15,6 @@ labels:
       - IoT
 
 variables:
-  # credentials for the device to configure
   - name: TARGET_IP
     description: NGFW IP or Hostname
     default: 192.168.55.10
@@ -28,6 +28,16 @@ variables:
     default: admin
     type_hint: password
 
+  - name: assess_options
+    description: Select validations of NGFW's IoT-readiness
+    default: []
+    type_hint: checkbox
+    cbx_list:
+      - key: Validate IoT configuration at the beginning of the workflow
+        value: run_iot_validation_begin
+      - key: Validate IoT configuration at the end of the workflow
+        value: run_iot_validation_end
+
   - name: cdl_options
     description: Select Cortex Data Lake (CDL) and Enhanced Application Logging (EAL) options
     default: []
@@ -35,6 +45,8 @@ variables:
     cbx_list:
       - key: Activate and configure CDL on the NGFW
         value: setup_cdl
+      - key: Enable duplicate logging to both Panorama and CDL
+        value: duplicate_logging
       - key: Enable CDL and EAL on existing log-forwarding profile
         value: modify_log_profile
       - key: Add new log forwarding profile that is CDL- and EAL-ready
@@ -61,6 +73,11 @@ variables:
       source: workflow_sw_version
       value: 'v10.x'
     cbx_list:
+      - key: Configure IoT-ready tap mode topolgy
+        value: enable_tap_mode
+        text_hint: |
+          Creates tap interface, tap zone, alert all security profile and group, CDL- and EAL-
+          ready log forwarding profile, and alert all security rule
       - key: Enable Device-ID on IoT source zone
         value: v10x_enable_device_id_zone
       - key: If NGFW is acting as a DHCP server, enable DHCP broadcast session
@@ -76,6 +93,11 @@ variables:
       source: workflow_sw_version
       value: 'v9.x'
     cbx_list:
+      - key: Configure IoT-ready tap mode topology
+        value: enable_tap_mode
+        text_hint: |
+          Creates tap interface, tap zone, alert all security profile and group, CDL- and EAL-
+          ready log forwarding profile, and alert all security rule
       - key: If NGFW is acting as a DHCP server, convert DHCP server to DHCP relay
         value: v9x_convert_dhcp_relay
       - key: If DHCP traffic is traversing a vwire, enable Multicast Firewalling
@@ -89,15 +111,6 @@ variables:
       - key: Add DHCP security policy for named zones
         value: add_dhcp_security_policy
 
-  - name: assess_options
-    description: Select IoT configuration and status validations
-    default: []
-    type_hint: checkbox
-    cbx_list:
-      - key: Validate IoT configuration at the beginning of the workflow
-        value: run_iot_validation_begin
-      - key: Validate IoT configuration at the end of the workflow
-        value: run_iot_validation_end
 
 snippets:
 # workflow stages for IoT setup and configuration
@@ -112,6 +125,14 @@ snippets:
 # setup Cortex Data Lake
   - name: cdl_global_config_playbook_script
     when: "'setup_cdl' in cdl_options"
+
+# enable vwire multicast firewalling
+  - name: iot_add_tap_mode_deployment
+    when: "(('enable_tap_mode' in v10x_options) and ('v10.x' in workflow_sw_version)) or (('enable_tap_mode' in v9x_options) and ('v9.x' in workflow_sw_version))"
+
+# enable duplicate logging
+  - name: panos_enable_duplicate_logging
+    when: "'duplicate_logging' in cdl_options"
 
 # modify log forwarding profile to use CDL and EAL
   - name: iot_add_cdl_and_eal_to_logging_profile
