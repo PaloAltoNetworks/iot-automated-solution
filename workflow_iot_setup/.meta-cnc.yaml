@@ -29,7 +29,7 @@ variables:
     type_hint: password
 
   - name: assess_options
-    description: Automation Element One: IoT-Readiness Validations
+    description: Automation Element 1 - IoT-Readiness Validations
     default: []
     type_hint: checkbox
     cbx_list:
@@ -38,8 +38,22 @@ variables:
       - key: Validate IoT configuration at the end of the workflow
         value: run_iot_validation_end
 
+  - name: tap_based_sensor
+    description: Special Case - Configure tap-based sensor elements to capture log events
+    default: No
+    type_hint: radio
+    help_text: |
+      This skillet will configure all network, logging and security objects, and security
+      rules needed to create a tap-based IoT-ready sensor. Beyond this radio input, simply
+      activate CDL for a complete configuration.
+    rad_list:
+      - key: 'Yes'
+        value: 'Yes'
+      - key: 'No'
+        value: 'No'
+
   - name: cdl_options
-    description: Select Cortex Data Lake (CDL) and Enhanced Application Logging (EAL) options
+    description: Automation Element 2a - Cortex Data Lake (CDL) Enablement
     default: []
     type_hint: checkbox
     cbx_list:
@@ -47,6 +61,12 @@ variables:
         value: setup_cdl
       - key: Enable duplicate logging to both Panorama and CDL
         value: duplicate_logging
+
+  - name: eal_options
+    description: Automation Element 2b - Enhanced Application Logging (EAL) options
+    default: []
+    type_hint: checkbox
+    cbx_list:
       - key: Enable CDL and EAL on existing log-forwarding profile
         value: modify_log_profile
       - key: Add new log forwarding profile that is CDL- and EAL-ready
@@ -66,18 +86,13 @@ variables:
         value: v10.x
 
   - name: v10x_options
-    description: Select PAN-OS 10.x configuration options for IoT readiness
+    description: Automation Element 3 - IoT Readiness Options for PAN-OS 10.x Topology
     default: []
     type_hint: checkbox
     toggle_hint:
       source: workflow_sw_version
       value: 'v10.x'
     cbx_list:
-      - key: Configure IoT-ready tap mode topolgy
-        value: enable_tap_mode
-        text_hint: |
-          Creates tap interface, tap zone, alert all security profile and group, CDL- and EAL-
-          ready log forwarding profile, and alert all security rule
       - key: Enable Device-ID on IoT source zone
         value: v10x_enable_device_id_zone
       - key: If NGFW is acting as a DHCP server, enable DHCP broadcast session
@@ -86,25 +101,20 @@ variables:
         value: vwire_enable_mcast_fw
 
   - name: v9x_options
-    description: Select PAN-OS 9.x configuration options for IoT readiness
+    description: Automation Element 3 - IoT Readiness Options for PAN-OS 9.x Topology
     default: []
     type_hint: checkbox
     toggle_hint:
       source: workflow_sw_version
       value: 'v9.x'
     cbx_list:
-      - key: Configure IoT-ready tap mode topology
-        value: enable_tap_mode
-        text_hint: |
-          Creates tap interface, tap zone, alert all security profile and group, CDL- and EAL-
-          ready log forwarding profile, and alert all security rule
       - key: If NGFW is acting as a DHCP server, convert DHCP server to DHCP relay
         value: v9x_convert_dhcp_relay
       - key: If DHCP traffic is traversing a vwire, enable Multicast Firewalling
         value: vwire_enable_mcast_fw
 
   - name: policy_options
-    description: Select IoT recommended security policy options
+    description: Additional - IoT Recommended Security Policy Options
     default: []
     type_hint: checkbox
     cbx_list:
@@ -128,7 +138,7 @@ snippets:
 
 # enable vwire multicast firewalling
   - name: iot_add_tap_mode_deployment
-    when: "(('enable_tap_mode' in v10x_options) and ('v10.x' in workflow_sw_version)) or (('enable_tap_mode' in v9x_options) and ('v9.x' in workflow_sw_version))"
+    when: "'Yes' in tap_based_sensor"
 
 # enable duplicate logging
   - name: panos_enable_duplicate_logging
@@ -136,15 +146,15 @@ snippets:
 
 # modify log forwarding profile to use CDL and EAL
   - name: iot_add_cdl_and_eal_to_logging_profile
-    when: "'modify_log_profile' in cdl_options"
+    when: "'modify_log_profile' in eal_options"
 
 # configure new log forwarding profile
   - name: iot_add_log_forwarding_profile
-    when: "'create_log_forwarding_profile' in cdl_options"
+    when: "'create_log_forwarding_profile' in eal_options"
 
 # add or update logging profile used in security rules
   - name: iot_add_logging_to_security_rules
-    when: "'add_logging_to_security_rules' in cdl_options"
+    when: "'add_logging_to_security_rules' in eal_options"
 
 # 10x enable device id per zone
   - name: iot_panos_enable_device_id_zone
