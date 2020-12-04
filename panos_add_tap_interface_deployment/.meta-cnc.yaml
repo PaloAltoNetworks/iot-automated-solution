@@ -37,7 +37,8 @@ snippets:
         <tap/>
       </entry>
     # If Andrew Silliker says device-id for 10.x isn't recommended. I'll take it out.
-  - name: create-tap-zone
+  - name: create-tap-zone-10x
+    when: "'v10.x' in workflow_sw_version"
     xpath: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone
     element: |-
         <entry name="Tap-Zone-IoT">
@@ -46,11 +47,23 @@ snippets:
               <member>{{ tap_interface }}</member>
             </tap>
           </network>
-          {%- if workflow_sw_version == "10.x" %}
           <enable-device-identification>yes</enable-device-identification>
-          {%- endif %}
           <enable-user-identification>yes</enable-user-identification>
         </entry>
+
+  - name: create-tap-zone-9x
+    when: "'v9.x' in workflow_sw_version"
+    xpath: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone
+    element: |-
+        <entry name="Tap-Zone-IoT">
+          <network>
+            <tap>
+              <member>{{ tap_interface }}</member>
+            </tap>
+          </network>
+          <enable-user-identification>yes</enable-user-identification>
+        </entry>
+
   - name: import-tap-interface
     xpath: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]
     element: |-

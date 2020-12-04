@@ -53,7 +53,7 @@ variables:
         value: 'No'
 
   - name: cdl_options
-    description: Automation Element 2a - Cortex Data Lake (CDL) Enablement
+    description: Automation Element 2 - Cortex Data Lake (CDL) and Enhanced Application Logging Enablement
     default: []
     type_hint: checkbox
     cbx_list:
@@ -61,12 +61,6 @@ variables:
         value: setup_cdl
       - key: Enable duplicate logging to both Panorama and CDL
         value: duplicate_logging
-
-  - name: eal_options
-    description: Automation Element 2b - Enhanced Application Logging (EAL) options
-    default: []
-    type_hint: checkbox
-    cbx_list:
       - key: Enable CDL and EAL on existing log-forwarding profile
         value: modify_log_profile
       - key: Add new log forwarding profile that is CDL- and EAL-ready
@@ -146,15 +140,15 @@ snippets:
 
 # modify log forwarding profile to use CDL and EAL
   - name: iot_add_cdl_and_eal_to_logging_profile
-    when: "'modify_log_profile' in eal_options"
+    when: "'modify_log_profile' in cdl_options"
 
 # configure new log forwarding profile
   - name: iot_add_log_forwarding_profile
-    when: "'create_log_forwarding_profile' in eal_options"
+    when: "'create_log_forwarding_profile' in cdl_options"
 
 # add or update logging profile used in security rules
   - name: iot_add_logging_to_security_rules
-    when: "'add_logging_to_security_rules' in eal_options"
+    when: "'add_logging_to_security_rules' in cdl_options"
 
 # 10x enable device id per zone
   - name: iot_panos_enable_device_id_zone
