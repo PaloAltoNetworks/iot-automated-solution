@@ -136,12 +136,19 @@ snippets:
     outputs:
       - name: cdl_enabled
         capture_value: /config/devices/entry/deviceconfig/setting/logging/logging-service-forwarding/enable/text()
+      - name: duplicate_enabled
+        capture_value: /config/devices/entry/deviceconfig/setting/logging/logging-service-forwarding/enable-duplicate-logging/text()
   - name: cdl_enabled_test
     label: Cortex Data Lake enabled in global configuration
-    test:  cdl_enabled == "yes"
+    test:  cdl_enabled == "yes" or duplicate_enabled == "yes"
     fail_message: |
       CDL must be enabled in the device to push logs to the cloud
-    pass_message: CDL is globally enabled
+    pass_message: |
+      {%- if duplicate_enabled == "yes" %}
+      CDL is globally enabled with duplicate logging.
+      {%- else %}
+      CDL is globally enabled.
+      {%- endif %}
     documentation_link: https://docs.paloaltonetworks.com/cortex/cortex-data-lake/cortex-data-lake-getting-started/get-started-with-cortex-data-lake/key.html
   # Cortex Data Lake logging region is configured
   - name: logging_service_regions_capture
