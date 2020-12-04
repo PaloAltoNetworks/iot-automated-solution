@@ -26,15 +26,13 @@ variables:
         value: v10.x
 
   - name: dhcp_setup
-    description: DHCP related checks
+    description: Topology-Specific IoT Readiness Checks
     default: ['']
     type_hint: checkbox
     cbx_list:
-      - key: local DHCP server checks
+      - key: NGFW is acting as a DHCP server
         value: dhcp_server_checks
-      - key: DHCP relay checks
-        value: dhcp_relay_checks
-      - key: using a Virtual Wire
+      - key: DHCP traffic is traversing a vwire
         value: using_vwire
 
 # snippets section
@@ -401,28 +399,6 @@ snippets:
     pass_message: |
       all profiles have EAL enabled
     documentation_link: https://docs.paloaltonetworks.com/pan-os/8-1/pan-os-admin/monitoring/enhanced-application-logs
-  # DHCP Broadcast Session must be Enabled for local DHCP Server EAL Logging
-  - name: dhcp_broadcast_enabled_capture
-    cmd: parse
-    variable: config
-    outputs:
-    # get list of the profiles that have EAL enabled via xpath below
-      - name: dhcp_broadcast_enabled
-        capture_value: |-
-          /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting/session/dhcp-bcast-session-on/text()
-
-
-  - name: dhcp_broadcast_enabled_test
-    label: DHCP Broadcast Session must be Enabled for local DHCP Server EAL Logging
-    test: dhcp_broadcast_enabled == 'yes'
-    when: "'dhcp_server_checks' in dhcp_setup"
-    fail_message: |
-      DHCP Broadcast Session is not enabled
-    pass_message: |
-      DHCP Broadcast Session is enabled
-    documentation_link: |
-      https://docs.paloaltonetworks.com/pan-os/10-0/pan-os-web-interface-help
-      /device/device-setup-session/session-settings.html
 
   # Virtual Wire Multicast Firewaling enabled for local DHCP Server EAL Logging
   - name: vwire_multicast_firewalling_capture
@@ -456,21 +432,42 @@ snippets:
       https://docs.paloaltonetworks.com/pan-os/10-0/pan-os-admin/networking/configure-interfaces/
       virtual-wire-interfaces/configure-virtual-wires.html
 
+  # DHCP Broadcast Session must be Enabled for local DHCP Server EAL Logging
+  - name: dhcp_broadcast_enabled_capture
+    cmd: parse
+    variable: config
+    outputs:
+    # get list of the profiles that have EAL enabled via xpath below
+      - name: dhcp_broadcast_enabled
+        capture_value: |-
+          /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting/session/dhcp-bcast-session-on/text()
+
+  - name: dhcp_broadcast_enabled_test
+    label: DHCP Broadcast Session must be Enabled for local DHCP Server EAL Logging
+    test: dhcp_broadcast_enabled == 'yes'
+    when: "('dhcp_server_checks' in dhcp_setup) and ('v10.x' in workflow_sw_version)"
+    fail_message: |
+      DHCP Broadcast Session is not enabled
+    pass_message: |
+      DHCP Broadcast Session is enabled
+    documentation_link: |
+      https://docs.paloaltonetworks.com/pan-os/10-0/pan-os-web-interface-help
+      /device/device-setup-session/session-settings.html
   # At least one instance of DHCP relay configured
   - name: dhcp_relay_configured_capture
     cmd: parse
     variable: config
     outputs:
-
       # check if any instance of DHCP relay configured
       - name: dhcp_relay_interfaces
         capture_list: |-
           /config/devices/entry[@name='localhost.localdomain']/network/dhcp/interface/entry/relay/../@name
 
+
   - name: dhcp_relay_configured_test
     label: At least one instance of DHCP relay configured
     test: dhcp_relay_interfaces | length
-    when: "'dhcp_relay_checks' in dhcp_setup"
+    when: "('dhcp_server_checks' in dhcp_setup) and ('v9.x' in workflow_sw_version)"
     fail_message: |
       DHCP relay not configured on this device
     pass_message: |
