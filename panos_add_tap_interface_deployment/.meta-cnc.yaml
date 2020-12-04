@@ -11,6 +11,16 @@ labels:
       - lib
 
 variables:
+  - name: workflow_sw_version
+    description: What PAN-OS version is the NGFW running?
+    default: v10.x
+    type_hint: dropdown
+    dd_list:
+      - key: v9.x
+        value: v9.x
+      - key: v10.x
+        value: v10.x
+
   - name: tap_interface
     description: Interface name to be used in tap mode
     default: ethernet1/2
@@ -26,6 +36,7 @@ snippets:
         <comment>Tap Interface for IoT Eval</comment>
         <tap/>
       </entry>
+    # If Andrew Silliker says device-id for 10.x isn't recommended. I'll take it out.
   - name: create-tap-zone
     xpath: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone
     element: |-
@@ -35,6 +46,9 @@ snippets:
               <member>{{ tap_interface }}</member>
             </tap>
           </network>
+          {%- if workflow_sw_version == "10.x" %}
+          <enable-device-identification>yes</enable-device-identification>
+          {%- endif %}
           <enable-user-identification>yes</enable-user-identification>
         </entry>
   - name: import-tap-interface
