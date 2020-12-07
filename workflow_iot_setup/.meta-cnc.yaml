@@ -152,7 +152,7 @@ snippets:
 
 # 10x enable device id per zone
   - name: iot_panos_enable_device_id_zone
-    when: "('v10x_enable_device_id_zone' in v10x_options) and ('v10.x' in workflow_sw_version)"
+    when: "('v10x_enable_device_id_zone' in v10x_options) and ('v10.x' in workflow_sw_version) and ('No' in tap_based_sensor)"
 
 # 10x enable dhcp session broadcast
   - name: panos_enable_dhcp_session_broadcast
