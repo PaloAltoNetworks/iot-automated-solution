@@ -1,8 +1,7 @@
 # IoT Automated Solutions
 
-Collection of content to help automate NGFW IoT deployments, configuration, and
+Collection of content to help automate NGFW Cortex IoT deployments, configuration, and
 traffic generation
-
 
 ## Prerequisites
 
@@ -11,7 +10,6 @@ traffic generation
     * NGFW serial number activated for Cortex IoT
     * panHandler: import the Github repo panos-logging-skillets
     * panHandler 4.0 or later if used to play skillets and playbooks
-    * Existing firewall configuration with interfaces, zones, policies
 
 ## IoT Configuration Workflow
 
@@ -50,7 +48,7 @@ required for IoT readiness. Used by the above IoT Configuration Workflow.
 Augment the HomeSkillet configuration for an IoT configuration and PoC.
 
     * Leverage the IoT workflow elements for CDL and IoT readiness
-    * Additional interface configuration for an IoT broker server
+    * Additional L3 interface configuration for an IoT broker server
     * Security policy allowing traffic between the IoT clients and broker
     
 ## IoT Traffic Generator Python Script
