@@ -28,8 +28,11 @@ and IoT readiness including:
     * Add a DHCP security policy for visbility
     * Configuration/system validation checks for CDL and IoT configuration elements
     
+For more details about which options to choose in the workflow, navigate to the **README** in the 
+`workflow_iot_setup` directory.
+
 For more details about each element in the IoT Configuration workflow, navigate to the according
-subdirectory to view additional READMEs. 
+subdirectory to view additional **README**s. 
     
 ### IoT Configuration Skillets
 

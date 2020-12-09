@@ -3,19 +3,20 @@
 This validation skillet provides a set of key checks to determine if the NGFW is
 correctly configured for IoT.
 
-## Cortex Data Lake
+## Cortex Data Lake Validations
 
-Assess CDL configuration and system state including:
+Assess CDL-specific configuration and system state including:
 
-* Logging Service license
-* Certifcate fetch and details
-* Global CDL device configuration
-* Log forwarding profiles CDL and EAL configuration
+    * Logging Service, IoT, and Threat Prevention license
+    * Device Certificate status for 10.x 
+    * CDL Certifcate status details
+    * Global CDL device configuration
+    * Log forwarding profiles CDL and EAL configuration
 
-## Cortex IoT
+## Topology-Specific IoT Readiness Validations
 
 Assess IoT related configuration for DHCP including:
 
-* 10.x local DHCP server: is DHCP Broadcast session enabled
-* 10.x Virtual Wire: is multicast firewalling enabled
-* 9.x DHCP: is DHCP relay configured
+    * 10.x local DHCP server: is DHCP Broadcast session enabled
+    * 9.x local DHCP server: is DHCP relay configured
+    * 9.x and 10.x Virtual Wire: is multicast firewalling enabled

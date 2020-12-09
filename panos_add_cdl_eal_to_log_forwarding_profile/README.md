@@ -3,7 +3,7 @@
 After CDL is successfully enabled in the NGFW, this skillet simplifies the updates
 needed to an existing log forwarding profile.
 
-Skillet coverage includes:
+Skillet operations includes:
 
     * capture the input name of the log forwarding profile
     * determine where the profile is configured (shared or vsys)

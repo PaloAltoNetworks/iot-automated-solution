@@ -1,11 +1,14 @@
 # Add DHCP Security Policy
 
-Create a new security policy based on the `dhcp` application for visbility purposes
-and to ensure it has a log forwarding profile that is configured for Cortex Data Lake and
-Enhanced Application Logging.
+This skillet creates a security policy to allow the `dhcp` application from 
+an inputted source zone to an inputted destination zone with a log forwarding configured.
 
-Once the rule is added the user can decide where to place the rule:
+Once created, this security policy, which is used for IoT visibility, can be moved
+either to the top, to the bottom or directly before/after a reference rule.
 
-* top or bottom
-* before or after with a reference rule name
+Skillet operations includes:
 
+    * capture the input name of the log forwarding profile, zones, and rule placement
+    * adds a security rule called dhcp-traffic to the rulebase
+    * moves the security rule
+    

@@ -40,7 +40,7 @@ variables:
 
   - name: tap_based_sensor
     description: Special Case - Configure tap-based sensor elements to capture log events
-    default: No
+    default: 'No'
     type_hint: radio
     help_text: |
       This skillet will configure all network, logging and security objects, and security

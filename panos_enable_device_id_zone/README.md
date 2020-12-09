@@ -6,7 +6,7 @@ This skillet is used to enable Device-ID on specified zones in order to identify
 devices, obtain policy rule recommendations for those devices, and enforce Security
 policies based on these recommendations.
 
->As a best practice, you never should enable Device-ID for a zone that contains the internet.
+As a best practice, you never should enable Device-ID for a zone that contains the internet.
 
 Skillet operations includes:
 
