@@ -1,10 +1,21 @@
 # Enable Device Identification per Zone
 
-To use Device-ID to detect devices and enforce your security policy, you must enable
-Device-ID in the internal, source zone of your IoT traffic. As a best practice, you 
-should enable Device-ID in the source zone of your IoT clients and should not 
-enable it for Internet/external zones.
+> **ONLY for firewalls running PAN-OS 10.x and above**
 
-This skillet allows the user to select one or more virtual zones for the configuration
-update.
+This skillet is used to enable Device-ID on specified zones in order to identify 
+devices, obtain policy rule recommendations for those devices, and enforce Security
+policies based on these recommendations.
+
+>As a best practice, you never should enable Device-ID for a zone that contains the internet.
+
+Skillet operations includes:
+
+    * populates the web UI with the existing zones 
+    * capture the input name(s) of the zones to configure
+    * enable Device-ID on each inputted zone
+
+> The `iot_get_device_values` skillet (located in the *rest_get_device_values* directory)
+> must be run with this skillet to capture the existing zones. This is easily done in 
+> the IoT workflow.
+
 
