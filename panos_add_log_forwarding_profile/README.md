@@ -1,9 +1,12 @@
 # Add Cortex Data Lake ready Log Forwarding Profile
 
-Configure a new log forwarding profile that is ready-to-go for CDL
-and Enhanced Application Logging.
+This skillet configures a new log forwarding profile that is ready-to-go for Cortex 
+Data Lake and Enhanced Application Logging.
 
-This profile is only configured for CDL and if syslog or other forwarding
-capabilities required, those must be added manually based on the user scenario.
+> This profile is only configured for CDL and if syslog or other forwarding
+> capabilities required, those must be added manually based on the user scenario.
 
-The only input is the name to be used for the log forwarding profile.
+Skillet operations includes:
+
+    * capture the input name of the log forwarding profile
+    * add log forwarding profile with all logs sent to Cortex Data Lake on vsys

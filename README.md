@@ -1,8 +1,7 @@
 # IoT Automated Solutions
 
-Collection of content to help automate NGFW IoT deployments, configuration, and
+Collection of content to help automate NGFW Cortex IoT deployments, configuration, and
 traffic generation
-
 
 ## Prerequisites
 
@@ -11,7 +10,6 @@ traffic generation
     * NGFW serial number activated for Cortex IoT
     * panHandler: import the Github repo panos-logging-skillets
     * panHandler 4.0 or later if used to play skillets and playbooks
-    * Existing firewall configuration with interfaces, zones, policies
 
 ## IoT Configuration Workflow
 
@@ -30,17 +28,28 @@ and IoT readiness including:
     * Add a DHCP security policy for visbility
     * Configuration/system validation checks for CDL and IoT configuration elements
     
+For more details about which options to choose in the workflow, navigate to the **README** in the 
+`workflow_iot_setup` directory.
+
 For more details about each element in the IoT Configuration workflow, navigate to the according
-subdirectory to view additional READMEs. 
+subdirectory to view additional **README**s. 
     
 ### IoT Configuration Skillets
-
 
 Simple configuration skillets designed to update the NGFW configuration to be CDL/IoT ready
 and are used by the above IoT Configuration Workflow.
 
-### IoT Validation Skillet
+#### IoT Tap-Based Sensor Configuration Skillet
 
+After CDL is successfully enabled in the NGFW, this workflow gives the option to turn the NGFW into a tap-based 
+sensor to gain visibility into the IoT devices and IoT traffic traversing a network.
+
+    * Add tap-based network components to NGFW
+    * Create profile to forward EAL and other logs to CDL
+    * Configure IronSkillet security profiles and groups
+    * Add security rule to allow, alert on, and forward all traffic seen from the tap interface
+
+### IoT Validation Skillet
 
 Validate key CDL and IoT NGFW elements to help users discover missing elements
 required for IoT readiness. Used by the above IoT Configuration Workflow.
@@ -50,7 +59,7 @@ required for IoT readiness. Used by the above IoT Configuration Workflow.
 Augment the HomeSkillet configuration for an IoT configuration and PoC.
 
     * Leverage the IoT workflow elements for CDL and IoT readiness
-    * Additional interface configuration for an IoT broker server
+    * Additional L3 interface configuration for an IoT broker server
     * Security policy allowing traffic between the IoT clients and broker
     
 ## IoT Traffic Generator Python Script

@@ -1,0 +1,21 @@
+# quick config to enable duplicate logging
+# useful if eval has panorama already configured to prevent 30-60 day log gaps
+name: panos_enable_duplicate_logging
+label: Enable Duplicate Logging
+description: Enable Duplicate Logging to Panorama and Cortex Data Lake
+type: panos
+labels:
+  collection:
+    - lib
+
+snippets:
+
+- name: device_disable_cdl
+  xpath: /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting/logging/logging-service-forwarding
+  element: |-
+    <enable>no</enable>
+
+- name: device_enable_duplicate_logging
+  xpath: /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting/logging/logging-service-forwarding
+  element: |-
+    <enable-duplicate-logging>yes</enable-duplicate-logging>
