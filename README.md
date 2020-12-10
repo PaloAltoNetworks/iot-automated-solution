@@ -36,12 +36,20 @@ subdirectory to view additional **README**s.
     
 ### IoT Configuration Skillets
 
-
 Simple configuration skillets designed to update the NGFW configuration to be CDL/IoT ready
 and are used by the above IoT Configuration Workflow.
 
-### IoT Validation Skillet
+#### IoT Tap-Based Sensor Configuration Skillet
 
+After CDL is successfully enabled in the NGFW, this workflow gives the option to turn the NGFW into a tap-based 
+sensor to gain visibility into the IoT devices and IoT traffic traversing a network.
+
+    * Add tap-based network components to NGFW
+    * Create profile to forward EAL and other logs to CDL
+    * Configure IronSkillet security profiles and groups
+    * Add security rule to allow, alert on, and forward all traffic seen from the tap interface
+
+### IoT Validation Skillet
 
 Validate key CDL and IoT NGFW elements to help users discover missing elements
 required for IoT readiness. Used by the above IoT Configuration Workflow.
