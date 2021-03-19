@@ -92,6 +92,8 @@ Downloads page on https://support.paloaltonetworks.com are provided under
 the best effort policy.
 
 ## Related Links
+It should be noted that this solution does not onboard the Firewall to the IoT Cortex service, that has to be done manually by the user.
+
 To learn more about how to use the CDL logging skillets and what exactly each one does, please refer to the following link:
 [PAN-OS CDL Logging](https://live.paloaltonetworks.com/t5/quickplay-solutions-articles/pan-os-cortex-data-lake-logging-quickplays/ta-p/348669)
 
