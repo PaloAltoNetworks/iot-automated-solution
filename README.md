@@ -91,3 +91,9 @@ all projects or work posted in our GitHub repository
 Downloads page on https://support.paloaltonetworks.com are provided under
 the best effort policy.
 
+## Related Links
+To learn more about how to use the CDL logging skillets and what exactly each one does, please refer to the following link:
+[PAN-OS CDL Logging](https://live.paloaltonetworks.com/t5/quickplay-solutions-articles/pan-os-cortex-data-lake-logging-quickplays/ta-p/348669)
+
+For a more in depth look at the requirements and flow of the IoT automated solution please refer to the following link:
+[IoT Automated Solutions Collection](https://gallery.pan.dev/repo/iot-automated-solution)
